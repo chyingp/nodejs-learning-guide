@@ -13,6 +13,7 @@
   * 数据加密-crypto
   * 二进制数据-buffer
   * 子进程-child\_process
+  * 进程相关-process
   * 集群-cluster
   * 基础调试-console
 
@@ -25,6 +26,8 @@
   * 全局对象-global
 
   * 模块机制-module
+
+  * 本地路径处理-path
   * 
 
 

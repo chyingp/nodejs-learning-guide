@@ -12,6 +12,7 @@
   * 网络UDP-dgram
   * 网络地址解析-url
   * 数据加密-crypto
+  * URL查询字符串-querystring
   * 二进制数据-buffer
   * 子进程-child\_process
   * 进程相关-process
@@ -30,8 +31,6 @@
 
   * 本地路径处理-path
 
-  * URL查询字符串-querystring
-
   * 逐行读取-readline
 
   * 命令行设计-repl
@@ -43,6 +42,7 @@
   * 定时器-timers
 
   * 安全加密-tls
+
   * 
   * 
   * 

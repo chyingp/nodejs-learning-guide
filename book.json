@@ -1,0 +1,14 @@
+{ 
+    "plugins": [ 
+        "github-buttons" 
+    ], 
+    "pluginsConfig": { 
+        "github-buttons": { 
+            "repo": "chyingp/Express-learning-guide", 
+            "types": [ 
+                "star", 
+                "watch"
+             ]
+         }
+     }
+}

@@ -1,0 +1,538 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Zlib Node.js v6.3.0 Manual &amp; Documentation</title>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic">
+	<link rel="stylesheet" href="assets/style.css">
+	<link rel="stylesheet" href="assets/sh.css">
+	<link rel="canonical" href="https://nodejs.org/api/zlib.html">
+</head>
+<body class="alt apidoc" id="api-section-zlib">
+<div id="content" class="clearfix">
+	<div id="column2" class="interior">
+		<div id="intro" class="interior">
+			<a href="/" title="Go back to the home page">
+				Node.js
+			</a>
+		</div>
+		<ul>
+			<li><a class="nav-documentation" href="documentation.html">About these Docs</a></li>
+			<li><a class="nav-synopsis" href="synopsis.html">Usage &amp; Example</a></li>
+		</ul>
+		<div class="line"></div>
+
+		<ul>
+			<li><a class="nav-assert" href="assert.html">Assertion Testing</a></li>
+			<li><a class="nav-buffer" href="buffer.html">Buffer</a></li>
+			<li><a class="nav-addons" href="addons.html">C/C++ Addons</a></li>
+			<li><a class="nav-child_process" href="child_process.html">Child Processes</a></li>
+			<li><a class="nav-cluster" href="cluster.html">Cluster</a></li>
+			<li><a class="nav-cli" href="cli.html">Command Line Options</a></li>
+			<li><a class="nav-console" href="console.html">Console</a></li>
+			<li><a class="nav-crypto" href="crypto.html">Crypto</a></li>
+			<li><a class="nav-debugger" href="debugger.html">Debugger</a></li>
+			<li><a class="nav-dns" href="dns.html">DNS</a></li>
+			<li><a class="nav-domain" href="domain.html">Domain</a></li>
+			<li><a class="nav-errors" href="errors.html">Errors</a></li>
+			<li><a class="nav-events" href="events.html">Events</a></li>
+			<li><a class="nav-fs" href="fs.html">File System</a></li>
+			<li><a class="nav-globals" href="globals.html">Globals</a></li>
+			<li><a class="nav-http" href="http.html">HTTP</a></li>
+			<li><a class="nav-https" href="https.html">HTTPS</a></li>
+			<li><a class="nav-modules" href="modules.html">Modules</a></li>
+			<li><a class="nav-net" href="net.html">Net</a></li>
+			<li><a class="nav-os" href="os.html">OS</a></li>
+			<li><a class="nav-path" href="path.html">Path</a></li>
+			<li><a class="nav-process" href="process.html">Process</a></li>
+			<li><a class="nav-punycode" href="punycode.html">Punycode</a></li>
+			<li><a class="nav-querystring" href="querystring.html">Query Strings</a></li>
+			<li><a class="nav-readline" href="readline.html">Readline</a></li>
+			<li><a class="nav-repl" href="repl.html">REPL</a></li>
+			<li><a class="nav-stream" href="stream.html">Stream</a></li>
+			<li><a class="nav-string_decoder" href="string_decoder.html">String Decoder</a></li>
+			<li><a class="nav-timers" href="timers.html">Timers</a></li>
+			<li><a class="nav-tls" href="tls.html">TLS/SSL</a></li>
+			<li><a class="nav-tty" href="tty.html">TTY</a></li>
+			<li><a class="nav-dgram" href="dgram.html">UDP/Datagram</a></li>
+			<li><a class="nav-url" href="url.html">URL</a></li>
+			<li><a class="nav-util" href="util.html">Utilities</a></li>
+			<li><a class="nav-v8" href="v8.html">V8</a></li>
+			<li><a class="nav-vm" href="vm.html">VM</a></li>
+			<li><a class="nav-zlib active" href="zlib.html">ZLIB</a></li>
+		</ul>
+		<div class="line"></div>
+
+		<ul>
+			<li><a class="nav-https-github-com-nodejs-node" href="https://github.com/nodejs/node">GitHub Repo &amp; Issue Tracker</a></li>
+			<li><a class="nav-http-groups-google-com-group-nodejs" href="http://groups.google.com/group/nodejs">Mailing List</a></li>
+		</ul>
+
+	</div>
+
+	<div id="column1" data-id="zlib" class="interior">
+		<header>
+			<h1>Node.js v6.3.0 Documentation</h1>
+			<div id="gtoc">
+				<p>
+					<a href="index.html" name="toc">Index</a> |
+					<a href="all.html">View on single page</a> |
+					<a href="zlib.json">View as JSON</a>
+				</p>
+			</div>
+			<hr>
+		</header>
+
+		<div id="toc">
+			<h2>Table of Contents</h2>
+			<ul>
+				<li><a href="#zlib_zlib">Zlib</a><ul>
+					<li><a href="#zlib_compressing_http_requests_and_responses">Compressing HTTP requests and responses</a></li>
+					<li><a href="#zlib_memory_usage_tuning">Memory Usage Tuning</a></li>
+					<li><a href="#zlib_flushing">Flushing</a></li>
+					<li><a href="#zlib_constants">Constants</a></li>
+					<li><a href="#zlib_class_options">Class Options</a></li>
+					<li><a href="#zlib_class_zlib_deflate">Class: zlib.Deflate</a></li>
+					<li><a href="#zlib_class_zlib_deflateraw">Class: zlib.DeflateRaw</a></li>
+					<li><a href="#zlib_class_zlib_gunzip">Class: zlib.Gunzip</a></li>
+					<li><a href="#zlib_class_zlib_gzip">Class: zlib.Gzip</a></li>
+					<li><a href="#zlib_class_zlib_inflate">Class: zlib.Inflate</a></li>
+					<li><a href="#zlib_class_zlib_inflateraw">Class: zlib.InflateRaw</a></li>
+					<li><a href="#zlib_class_zlib_unzip">Class: zlib.Unzip</a></li>
+					<li><a href="#zlib_class_zlib_zlib">Class: zlib.Zlib</a><ul>
+						<li><a href="#zlib_zlib_flush_kind_callback">zlib.flush([kind], callback)</a></li>
+						<li><a href="#zlib_zlib_params_level_strategy_callback">zlib.params(level, strategy, callback)</a></li>
+						<li><a href="#zlib_zlib_reset">zlib.reset()</a></li>
+					</ul>
+					</li>
+					<li><a href="#zlib_zlib_createdeflate_options">zlib.createDeflate([options])</a></li>
+					<li><a href="#zlib_zlib_createdeflateraw_options">zlib.createDeflateRaw([options])</a></li>
+					<li><a href="#zlib_zlib_creategunzip_options">zlib.createGunzip([options])</a></li>
+					<li><a href="#zlib_zlib_creategzip_options">zlib.createGzip([options])</a></li>
+					<li><a href="#zlib_zlib_createinflate_options">zlib.createInflate([options])</a></li>
+					<li><a href="#zlib_zlib_createinflateraw_options">zlib.createInflateRaw([options])</a></li>
+					<li><a href="#zlib_zlib_createunzip_options">zlib.createUnzip([options])</a></li>
+					<li><a href="#zlib_convenience_methods">Convenience Methods</a><ul>
+						<li><a href="#zlib_zlib_deflate_buf_options_callback">zlib.deflate(buf[, options], callback)</a></li>
+						<li><a href="#zlib_zlib_deflatesync_buf_options">zlib.deflateSync(buf[, options])</a></li>
+						<li><a href="#zlib_zlib_deflateraw_buf_options_callback">zlib.deflateRaw(buf[, options], callback)</a></li>
+						<li><a href="#zlib_zlib_deflaterawsync_buf_options">zlib.deflateRawSync(buf[, options])</a></li>
+						<li><a href="#zlib_zlib_gunzip_buf_options_callback">zlib.gunzip(buf[, options], callback)</a></li>
+						<li><a href="#zlib_zlib_gunzipsync_buf_options">zlib.gunzipSync(buf[, options])</a></li>
+						<li><a href="#zlib_zlib_gzip_buf_options_callback">zlib.gzip(buf[, options], callback)</a></li>
+						<li><a href="#zlib_zlib_gzipsync_buf_options">zlib.gzipSync(buf[, options])</a></li>
+						<li><a href="#zlib_zlib_inflate_buf_options_callback">zlib.inflate(buf[, options], callback)</a></li>
+						<li><a href="#zlib_zlib_inflatesync_buf_options">zlib.inflateSync(buf[, options])</a></li>
+						<li><a href="#zlib_zlib_inflateraw_buf_options_callback">zlib.inflateRaw(buf[, options], callback)</a></li>
+						<li><a href="#zlib_zlib_inflaterawsync_buf_options">zlib.inflateRawSync(buf[, options])</a></li>
+						<li><a href="#zlib_zlib_unzip_buf_options_callback">zlib.unzip(buf[, options], callback)</a></li>
+						<li><a href="#zlib_zlib_unzipsync_buf_options">zlib.unzipSync(buf[, options])</a></li>
+					</ul>
+					</li>
+				</ul>
+				</li>
+			</ul>
+
+		</div>
+
+		<div id="apicontent">
+			<h1>Zlib<span><a class="mark" href="#zlib_zlib" id="zlib_zlib">#</a></span></h1>
+			<pre class="api_stability api_stability_2">Stability: 2 - Stable</pre><p>The <code>zlib</code> module provides compression functionality implemented using Gzip and
+			Deflate/Inflate. It can be accessed using:</p>
+<pre><code class="lang-js">const zlib = require(&#39;zlib&#39;);
+</code></pre>
+			<p>Compressing or decompressing a stream (such as a file) can be accomplished by
+				piping the source stream data through a <code>zlib</code> stream into a destination stream:</p>
+<pre><code class="lang-js">const gzip = zlib.createGzip();
+	const fs = require(&#39;fs&#39;);
+	const inp = fs.createReadStream(&#39;input.txt&#39;);
+	const out = fs.createWriteStream(&#39;input.txt.gz&#39;);
+
+	inp.pipe(gzip).pipe(out);
+</code></pre>
+			<p>It is also possible to compress or decompress data in a single step:</p>
+<pre><code class="lang-js">const input = &#39;.................................&#39;;
+	zlib.deflate(input, (err, buffer) =&gt; {
+	if (!err) {
+	console.log(buffer.toString(&#39;base64&#39;));
+	} else {
+	// handle error
+	}
+	});
+
+	const buffer = Buffer.from(&#39;eJzT0yMAAGTvBe8=&#39;, &#39;base64&#39;);
+	zlib.unzip(buffer, (err, buffer) =&gt; {
+	if (!err) {
+	console.log(buffer.toString());
+	} else {
+	// handle error
+	}
+	});
+</code></pre>
+			<h2>Compressing HTTP requests and responses<span><a class="mark" href="#zlib_compressing_http_requests_and_responses" id="zlib_compressing_http_requests_and_responses">#</a></span></h2>
+			<p>The <code>zlib</code> module can be used to implement support for the <code>gzip</code> and <code>deflate</code>
+				content-encoding mechanisms defined by
+				<a href="https://tools.ietf.org/html/rfc7230#section-4.2">HTTP</a>.</p>
+			<p>The HTTP <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.3"><code>Accept-Encoding</code></a> header is used within an http request to identify
+				the compression encodings accepted by the client. The <a href="https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.11"><code>Content-Encoding</code></a>
+				header is used to identify the compression encodings actually applied to a
+				message.</p>
+			<p><strong>Note: the examples given below are drastically simplified to show
+				the basic concept.</strong>  Using <code>zlib</code> encoding can be expensive, and the results
+				ought to be cached.  See <a href="#zlib_memory_usage_tuning">Memory Usage Tuning</a> for more information
+				on the speed/memory/compression tradeoffs involved in <code>zlib</code> usage.</p>
+<pre><code class="lang-js">// client request example
+	const zlib = require(&#39;zlib&#39;);
+	const http = require(&#39;http&#39;);
+	const fs = require(&#39;fs&#39;);
+	const request = http.get({ host: &#39;example.com&#39;,
+	path: &#39;/&#39;,
+	port: 80,
+	headers: { &#39;Accept-Encoding&#39;: &#39;gzip,deflate&#39; } });
+	request.on(&#39;response&#39;, (response) =&gt; {
+	var output = fs.createWriteStream(&#39;example.com_index.html&#39;);
+
+	switch (response.headers[&#39;content-encoding&#39;]) {
+	// or, just use zlib.createUnzip() to handle both cases
+	case &#39;gzip&#39;:
+	response.pipe(zlib.createGunzip()).pipe(output);
+	break;
+	case &#39;deflate&#39;:
+	response.pipe(zlib.createInflate()).pipe(output);
+	break;
+	default:
+	response.pipe(output);
+	break;
+	}
+	});
+
+	// server example
+	// Running a gzip operation on every request is quite expensive.
+	// It would be much more efficient to cache the compressed buffer.
+	const zlib = require(&#39;zlib&#39;);
+	const http = require(&#39;http&#39;);
+	const fs = require(&#39;fs&#39;);
+	http.createServer((request, response) =&gt; {
+	var raw = fs.createReadStream(&#39;index.html&#39;);
+	var acceptEncoding = request.headers[&#39;accept-encoding&#39;];
+	if (!acceptEncoding) {
+	acceptEncoding = &#39;&#39;;
+	}
+
+	// Note: this is not a conformant accept-encoding parser.
+	// See http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.3
+	if (acceptEncoding.match(/\bdeflate\b/)) {
+	response.writeHead(200, { &#39;Content-Encoding&#39;: &#39;deflate&#39; });
+	raw.pipe(zlib.createDeflate()).pipe(response);
+	} else if (acceptEncoding.match(/\bgzip\b/)) {
+	response.writeHead(200, { &#39;Content-Encoding&#39;: &#39;gzip&#39; });
+	raw.pipe(zlib.createGzip()).pipe(response);
+	} else {
+	response.writeHead(200, {});
+	raw.pipe(response);
+	}
+	}).listen(1337);
+</code></pre>
+			<p>By default, the <code>zlib</code> methods with throw an error when decompressing
+				truncated data. However, if it is known that the data is incomplete, or
+				the desire is to inspect only the beginning of a compressed file, it is
+				possible to suppress the default error handling by changing the flushing
+				method that is used to compressed the last chunk of input data:</p>
+<pre><code class="lang-js">// This is a truncated version of the buffer from the above examples
+	const buffer = Buffer.from(&#39;eJzT0yMA&#39;, &#39;base64&#39;);
+
+	zlib.unzip(buffer, { finishFlush: zlib.Z_SYNC_FLUSH }, (err, buffer) =&gt; {
+	if (!err) {
+	console.log(buffer.toString());
+	} else {
+	// handle error
+	}
+	});
+</code></pre>
+			<p>This will not change the behavior in other error-throwing situations, e.g.
+				when the input data has an invalid format. Using this method, it will not be
+				possible to determine whether the input ended prematurely or lacks the
+				integrity checks, making it necessary to manually check that the
+				decompressed result is valid.</p>
+			<h2>Memory Usage Tuning<span><a class="mark" href="#zlib_memory_usage_tuning" id="zlib_memory_usage_tuning">#</a></span></h2>
+			<!--type=misc-->
+			<p>From <code>zlib/zconf.h</code>, modified to node.js&#39;s usage:</p>
+			<p>The memory requirements for deflate are (in bytes):</p>
+<pre><code>(1 &lt;&lt; (windowBits+2)) +  (1 &lt;&lt; (memLevel+9))
+</code></pre><p>That is: 128K for windowBits=15  +  128K for memLevel = 8
+			(default values) plus a few kilobytes for small objects.</p>
+			<p>For example, to reduce the default memory requirements from 256K to 128K, the
+				options shoud be set to:</p>
+<pre><code>{ windowBits: 14, memLevel: 7 }
+</code></pre><p>This will, however, generally degrade compression.</p>
+			<p>The memory requirements for inflate are (in bytes)</p>
+<pre><code>1 &lt;&lt; windowBits
+</code></pre><p>That is, 32K for windowBits=15 (default value) plus a few kilobytes
+			for small objects.</p>
+			<p>This is in addition to a single internal output slab buffer of size
+				<code>chunkSize</code>, which defaults to 16K.</p>
+			<p>The speed of <code>zlib</code> compression is affected most dramatically by the
+				<code>level</code> setting.  A higher level will result in better compression, but
+				will take longer to complete.  A lower level will result in less
+				compression, but will be much faster.</p>
+			<p>In general, greater memory usage options will mean that Node.js has to make
+				fewer calls to <code>zlib</code> because it will be able to process more data on
+				each <code>write</code> operation.  So, this is another factor that affects the
+				speed, at the cost of memory usage.</p>
+			<h2>Flushing<span><a class="mark" href="#zlib_flushing" id="zlib_flushing">#</a></span></h2>
+			<p>Calling <a href="#zlib_zlib_flush_kind_callback"><code>.flush()</code></a> on a compression stream will make <code>zlib</code> return as much
+				output as currently possible. This may come at the cost of degraded compression
+				quality, but can be useful when data needs to be available as soon as possible.</p>
+			<p>In the following example, <code>flush()</code> is used to write a compressed partial
+				HTTP response to the client:</p>
+<pre><code class="lang-js">const zlib = require(&#39;zlib&#39;);
+	const http = require(&#39;http&#39;);
+
+	http.createServer((request, response) =&gt; {
+	// For the sake of simplicity, the Accept-Encoding checks are omitted.
+	response.writeHead(200, { &#39;content-encoding&#39;: &#39;gzip&#39; });
+	const output = zlib.createGzip();
+	output.pipe(response);
+
+	setInterval(() =&gt; {
+	output.write(`The current time is ${Date()}\n`, () =&gt; {
+	// The data has been passed to zlib, but the compression algorithm may
+	// have decided to buffer the data for more efficient compression.
+	// Calling .flush() will make the data available as soon as the client
+	// is ready to receive it.
+	output.flush();
+	});
+	}, 1000);
+	}).listen(1337);
+</code></pre>
+			<h2>Constants<span><a class="mark" href="#zlib_constants" id="zlib_constants">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><!--type=misc-->
+			<p>All of the constants defined in <code>zlib.h</code> are also defined on <code>require(&#39;zlib&#39;)</code>.
+				In the normal course of operations, it will not be necessary to use these
+				constants. They are documented so that their presence is not surprising. This
+				section is taken almost directly from the <a href="http://zlib.net/manual.html#Constants">zlib documentation</a>.  See
+				<a href="http://zlib.net/manual.html#Constants">http://zlib.net/manual.html#Constants</a> for more details.</p>
+			<p>Allowed flush values.</p>
+			<ul>
+				<li><code>zlib.Z_NO_FLUSH</code></li>
+				<li><code>zlib.Z_PARTIAL_FLUSH</code></li>
+				<li><code>zlib.Z_SYNC_FLUSH</code></li>
+				<li><code>zlib.Z_FULL_FLUSH</code></li>
+				<li><code>zlib.Z_FINISH</code></li>
+				<li><code>zlib.Z_BLOCK</code></li>
+				<li><code>zlib.Z_TREES</code></li>
+			</ul>
+			<p>Return codes for the compression/decompression functions. Negative
+				values are errors, positive values are used for special but normal
+				events.</p>
+			<ul>
+				<li><code>zlib.Z_OK</code></li>
+				<li><code>zlib.Z_STREAM_END</code></li>
+				<li><code>zlib.Z_NEED_DICT</code></li>
+				<li><code>zlib.Z_ERRNO</code></li>
+				<li><code>zlib.Z_STREAM_ERROR</code></li>
+				<li><code>zlib.Z_DATA_ERROR</code></li>
+				<li><code>zlib.Z_MEM_ERROR</code></li>
+				<li><code>zlib.Z_BUF_ERROR</code></li>
+				<li><code>zlib.Z_VERSION_ERROR</code></li>
+			</ul>
+			<p>Compression levels.</p>
+			<ul>
+				<li><code>zlib.Z_NO_COMPRESSION</code></li>
+				<li><code>zlib.Z_BEST_SPEED</code></li>
+				<li><code>zlib.Z_BEST_COMPRESSION</code></li>
+				<li><code>zlib.Z_DEFAULT_COMPRESSION</code></li>
+			</ul>
+			<p>Compression strategy.</p>
+			<ul>
+				<li><code>zlib.Z_FILTERED</code></li>
+				<li><code>zlib.Z_HUFFMAN_ONLY</code></li>
+				<li><code>zlib.Z_RLE</code></li>
+				<li><code>zlib.Z_FIXED</code></li>
+				<li><code>zlib.Z_DEFAULT_STRATEGY</code></li>
+			</ul>
+			<p>Possible values of the data_type field.</p>
+			<ul>
+				<li><code>zlib.Z_BINARY</code></li>
+				<li><code>zlib.Z_TEXT</code></li>
+				<li><code>zlib.Z_ASCII</code></li>
+				<li><code>zlib.Z_UNKNOWN</code></li>
+			</ul>
+			<p>The deflate compression method (the only one supported in this version).</p>
+			<ul>
+				<li><code>zlib.Z_DEFLATED</code></li>
+			</ul>
+			<p>For initializing zalloc, zfree, opaque.</p>
+			<ul>
+				<li><code>zlib.Z_NULL</code></li>
+			</ul>
+			<h2>Class Options<span><a class="mark" href="#zlib_class_options" id="zlib_class_options">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.11.1</span>
+			</div><!--type=misc-->
+			<p>Each class takes an <code>options</code> object.  All options are optional.</p>
+			<p>Note that some options are only relevant when compressing, and are
+				ignored by the decompression classes.</p>
+			<ul>
+				<li><code>flush</code> (default: <code>zlib.Z_NO_FLUSH</code>)</li>
+				<li><code>finishFlush</code> (default: <code>zlib.Z_FINISH</code>)</li>
+				<li><code>chunkSize</code> (default: 16*1024)</li>
+				<li><code>windowBits</code></li>
+				<li><code>level</code> (compression only)</li>
+				<li><code>memLevel</code> (compression only)</li>
+				<li><code>strategy</code> (compression only)</li>
+				<li><code>dictionary</code> (deflate/inflate only, empty dictionary by default)</li>
+			</ul>
+			<p>See the description of <code>deflateInit2</code> and <code>inflateInit2</code> at
+				<a href="http://zlib.net/manual.html#Advanced">http://zlib.net/manual.html#Advanced</a> for more information on these.</p>
+			<h2>Class: zlib.Deflate<span><a class="mark" href="#zlib_class_zlib_deflate" id="zlib_class_zlib_deflate">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Compress data using deflate.</p>
+			<h2>Class: zlib.DeflateRaw<span><a class="mark" href="#zlib_class_zlib_deflateraw" id="zlib_class_zlib_deflateraw">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Compress data using deflate, and do not append a <code>zlib</code> header.</p>
+			<h2>Class: zlib.Gunzip<span><a class="mark" href="#zlib_class_zlib_gunzip" id="zlib_class_zlib_gunzip">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Decompress a gzip stream.</p>
+			<h2>Class: zlib.Gzip<span><a class="mark" href="#zlib_class_zlib_gzip" id="zlib_class_zlib_gzip">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Compress data using gzip.</p>
+			<h2>Class: zlib.Inflate<span><a class="mark" href="#zlib_class_zlib_inflate" id="zlib_class_zlib_inflate">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Decompress a deflate stream.</p>
+			<h2>Class: zlib.InflateRaw<span><a class="mark" href="#zlib_class_zlib_inflateraw" id="zlib_class_zlib_inflateraw">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Decompress a raw deflate stream.</p>
+			<h2>Class: zlib.Unzip<span><a class="mark" href="#zlib_class_zlib_unzip" id="zlib_class_zlib_unzip">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Decompress either a Gzip- or Deflate-compressed stream by auto-detecting
+			the header.</p>
+			<h2>Class: zlib.Zlib<span><a class="mark" href="#zlib_class_zlib_zlib" id="zlib_class_zlib_zlib">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Not exported by the <code>zlib</code> module. It is documented here because it is the base
+			class of the compressor/decompressor classes.</p>
+			<h3>zlib.flush([kind], callback)<span><a class="mark" href="#zlib_zlib_flush_kind_callback" id="zlib_zlib_flush_kind_callback">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p><code>kind</code> defaults to <code>zlib.Z_FULL_FLUSH</code>.</p>
+			<p>Flush pending data. Don&#39;t call this frivolously, premature flushes negatively
+				impact the effectiveness of the compression algorithm.</p>
+			<p>Calling this only flushes data from the internal <code>zlib</code> state, and does not
+				perform flushing of any kind on the streams level. Rather, it behaves like a
+				normal call to <code>.write()</code>, i.e. it will be queued up behind other pending
+				writes and will only produce output when data is being read from the stream.</p>
+			<h3>zlib.params(level, strategy, callback)<span><a class="mark" href="#zlib_zlib_params_level_strategy_callback" id="zlib_zlib_params_level_strategy_callback">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.11.4</span>
+			</div><p>Dynamically update the compression level and compression strategy.
+			Only applicable to deflate algorithm.</p>
+			<h3>zlib.reset()<span><a class="mark" href="#zlib_zlib_reset" id="zlib_zlib_reset">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.7.0</span>
+			</div><p>Reset the compressor/decompressor to factory defaults. Only applicable to
+			the inflate and deflate algorithms.</p>
+			<h2>zlib.createDeflate(<a href="#zlib_class_options">options</a>)<span><a class="mark" href="#zlib_zlib_createdeflate_options" id="zlib_zlib_createdeflate_options">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Returns a new <a href="#zlib_class_zlib_deflate">Deflate</a> object with an <a href="#zlib_class_options">options</a>.</p>
+			<h2>zlib.createDeflateRaw(<a href="#zlib_class_options">options</a>)<span><a class="mark" href="#zlib_zlib_createdeflateraw_options" id="zlib_zlib_createdeflateraw_options">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Returns a new <a href="#zlib_class_zlib_deflateraw">DeflateRaw</a> object with an <a href="#zlib_class_options">options</a>.</p>
+			<h2>zlib.createGunzip(<a href="#zlib_class_options">options</a>)<span><a class="mark" href="#zlib_zlib_creategunzip_options" id="zlib_zlib_creategunzip_options">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Returns a new <a href="#zlib_class_zlib_gunzip">Gunzip</a> object with an <a href="#zlib_class_options">options</a>.</p>
+			<h2>zlib.createGzip(<a href="#zlib_class_options">options</a>)<span><a class="mark" href="#zlib_zlib_creategzip_options" id="zlib_zlib_creategzip_options">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Returns a new <a href="#zlib_class_zlib_gzip">Gzip</a> object with an <a href="#zlib_class_options">options</a>.</p>
+			<h2>zlib.createInflate(<a href="#zlib_class_options">options</a>)<span><a class="mark" href="#zlib_zlib_createinflate_options" id="zlib_zlib_createinflate_options">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Returns a new <a href="#zlib_class_zlib_inflate">Inflate</a> object with an <a href="#zlib_class_options">options</a>.</p>
+			<h2>zlib.createInflateRaw(<a href="#zlib_class_options">options</a>)<span><a class="mark" href="#zlib_zlib_createinflateraw_options" id="zlib_zlib_createinflateraw_options">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Returns a new <a href="#zlib_class_zlib_inflateraw">InflateRaw</a> object with an <a href="#zlib_class_options">options</a>.</p>
+			<h2>zlib.createUnzip(<a href="#zlib_class_options">options</a>)<span><a class="mark" href="#zlib_zlib_createunzip_options" id="zlib_zlib_createunzip_options">#</a></span></h2>
+			<div class="api_metadata">
+				<span>Added in: v0.5.8</span>
+			</div><p>Returns a new <a href="#zlib_class_zlib_unzip">Unzip</a> object with an <a href="#zlib_class_options">options</a>.</p>
+			<h2>Convenience Methods<span><a class="mark" href="#zlib_convenience_methods" id="zlib_convenience_methods">#</a></span></h2>
+			<!--type=misc-->
+			<p>All of these take a <a href="buffer.html">Buffer</a> or string as the first argument, an optional
+				second argument to supply options to the <code>zlib</code> classes and will call the
+				supplied callback with <code>callback(error, result)</code>.</p>
+			<p>Every method has a <code>*Sync</code> counterpart, which accept the same arguments, but
+				without a callback.</p>
+			<h3>zlib.deflate(buf[, options], callback)<span><a class="mark" href="#zlib_zlib_deflate_buf_options_callback" id="zlib_zlib_deflate_buf_options_callback">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.6.0</span>
+			</div><h3>zlib.deflateSync(buf[, options])<span><a class="mark" href="#zlib_zlib_deflatesync_buf_options" id="zlib_zlib_deflatesync_buf_options">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.11.12</span>
+			</div><p>Compress a Buffer or string with Deflate.</p>
+			<h3>zlib.deflateRaw(buf[, options], callback)<span><a class="mark" href="#zlib_zlib_deflateraw_buf_options_callback" id="zlib_zlib_deflateraw_buf_options_callback">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.6.0</span>
+			</div><h3>zlib.deflateRawSync(buf[, options])<span><a class="mark" href="#zlib_zlib_deflaterawsync_buf_options" id="zlib_zlib_deflaterawsync_buf_options">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.11.12</span>
+			</div><p>Compress a Buffer or string with DeflateRaw.</p>
+			<h3>zlib.gunzip(buf[, options], callback)<span><a class="mark" href="#zlib_zlib_gunzip_buf_options_callback" id="zlib_zlib_gunzip_buf_options_callback">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.6.0</span>
+			</div><h3>zlib.gunzipSync(buf[, options])<span><a class="mark" href="#zlib_zlib_gunzipsync_buf_options" id="zlib_zlib_gunzipsync_buf_options">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.11.12</span>
+			</div><p>Decompress a Buffer or string with Gunzip.</p>
+			<h3>zlib.gzip(buf[, options], callback)<span><a class="mark" href="#zlib_zlib_gzip_buf_options_callback" id="zlib_zlib_gzip_buf_options_callback">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.6.0</span>
+			</div><h3>zlib.gzipSync(buf[, options])<span><a class="mark" href="#zlib_zlib_gzipsync_buf_options" id="zlib_zlib_gzipsync_buf_options">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.11.12</span>
+			</div><p>Compress a Buffer or string with Gzip.</p>
+			<h3>zlib.inflate(buf[, options], callback)<span><a class="mark" href="#zlib_zlib_inflate_buf_options_callback" id="zlib_zlib_inflate_buf_options_callback">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.6.0</span>
+			</div><h3>zlib.inflateSync(buf[, options])<span><a class="mark" href="#zlib_zlib_inflatesync_buf_options" id="zlib_zlib_inflatesync_buf_options">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.11.12</span>
+			</div><p>Decompress a Buffer or string with Inflate.</p>
+			<h3>zlib.inflateRaw(buf[, options], callback)<span><a class="mark" href="#zlib_zlib_inflateraw_buf_options_callback" id="zlib_zlib_inflateraw_buf_options_callback">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.6.0</span>
+			</div><h3>zlib.inflateRawSync(buf[, options])<span><a class="mark" href="#zlib_zlib_inflaterawsync_buf_options" id="zlib_zlib_inflaterawsync_buf_options">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.11.12</span>
+			</div><p>Decompress a Buffer or string with InflateRaw.</p>
+			<h3>zlib.unzip(buf[, options], callback)<span><a class="mark" href="#zlib_zlib_unzip_buf_options_callback" id="zlib_zlib_unzip_buf_options_callback">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.6.0</span>
+			</div><h3>zlib.unzipSync(buf[, options])<span><a class="mark" href="#zlib_zlib_unzipsync_buf_options" id="zlib_zlib_unzipsync_buf_options">#</a></span></h3>
+			<div class="api_metadata">
+				<span>Added in: v0.11.12</span>
+			</div><p>Decompress a Buffer or string with Unzip.</p>
+
+		</div>
+	</div>
+</div>
+<script src="assets/sh_main.js"></script>
+<script src="assets/sh_javascript.min.js"></script>
+<script>highlight(undefined, undefined, 'pre');</script>
+</body>
+</html>
+

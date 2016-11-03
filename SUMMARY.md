@@ -17,7 +17,9 @@
   * 进阶调试-debugger
 
   * 错误处理-error
+
   * 事件机制-events
-  * 
+  * 全局对象-xxx
+  * 模块机制-module
 
 

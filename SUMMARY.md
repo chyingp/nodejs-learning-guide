@@ -11,6 +11,8 @@
   * 二进制数据-buffer
   * 子进程-child\_process
   * 集群-cluster
-  * 
+  * 基础调试-console
+
+  * 进阶调试-debugger
 
 

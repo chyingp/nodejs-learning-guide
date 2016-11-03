@@ -19,7 +19,10 @@
   * 错误处理-error
 
   * 事件机制-events
-  * 全局对象-xxx
+
+  * 全局对象-global
   * 模块机制-module
+  * 网络TCP-net
+  * 网络UDP-dgram
 
 

@@ -30,6 +30,8 @@
   * 本地路径处理-path
 
   * URL查询字符串-querystring
+
+  * 逐行读取-readline
   * 
 
 

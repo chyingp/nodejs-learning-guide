@@ -3,16 +3,16 @@
 * [Introduction](README.md)
 * [内置模块](内置模块.md)
 
-  * [资源压缩-zlib](模块/zlib.md)
+  * [资源压缩-zlib\(ok\)](模块/zlib.md)
   * 文件系统操作-fs
-  * [域名解析-dns](模块/dns.md)
+  * [域名解析-dns\(ok\)](模块/dns.md)
   * 网络服务-http
   * 网络服务-https
   * 网络TCP-net
   * 网络UDP-dgram
   * 网络地址解析-url
   * 数据加密-crypto
-  * URL查询字符串-querystring
+  * [URL查询字符串-querystring\(ok\)](/模块/querystring.md)
   * 二进制数据-buffer
   * 子进程-child\_process
   * 进程相关-process

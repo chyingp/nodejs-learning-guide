@@ -4,19 +4,19 @@ nodejs中，提供了**url**这个非常实用的模块，用来做URL的解析�
 
 正式讲解前，各位同学先把下面这个图记在心上（来自nodejs官网），先对URL有一个直观的认识。
 
-![Alt text](./1467900810073.png)
+![](/assets/url.png)
 
 ## 模块方法概述
 
 url模块三个方法分别是：
 
-* **.parse(urlString)**：将url字符串，解析成object，便于开发者进行操作。
-* **.format(urlObj)**：.parse() 方法的反向操作。
-* **.resove(from, to)**：以from作为起始地址，解析出完整的目标地址（还是看直接看例子好些）
+* **.parse\(urlString\)**：将url字符串，解析成object，便于开发者进行操作。
+* **.format\(urlObj\)**：.parse\(\) 方法的反向操作。
+* **.resove\(from, to\)**：以from作为起始地址，解析出完整的目标地址（还是看直接看例子好些）
 
-## url解析：url.parse()
+## url解析：url.parse\(\)
 
->完整语法：url.parse(urlString[, parseQueryString[, slashesDenoteHost]])
+> 完整语法：url.parse\(urlString\[, parseQueryString\[, slashesDenoteHost\]\]\)
 
 使用比较简单，几个要点备忘如下。
 
@@ -84,8 +84,7 @@ Url {
   href: 'http://Chyingp:HelloWorld@ke.qq.com:8080/index.html?nick=%E7%A8%8B%E5%BA%8F%E7%8C%BF%E5%B0%8F%E5%8D%A1#part=1' }
 ```
 
-
-### 例子3：针对路径 //foo/bar 的处理
+### 例子3：针对路径 \/\/foo\/bar 的处理
 
 代码如下：
 
@@ -131,7 +130,6 @@ Url {
   href: '//foo/bar' }
 ```
 
-
 ## 关于urlObject
 
 以上面的作为例子，粗略讲解下`urlObject`。更多细节可参考[官方文档](https://nodejs.org/api/url.html#url_url_strings_and_url_objects)。
@@ -164,15 +162,15 @@ Url {
   href: 'http://Chyingp:HelloWorld@ke.qq.com:8080/index.html?nick=%E7%A8%8B%E5%BA%8F%E7%8C%BF%E5%B0%8F%E5%8D%A1#part=1' }
 ```
 
-## url拼接：url.format(urlObject)
+## url拼接：url.format\(urlObject\)
 
->完整语法：url.format(urlObject)
+> 完整语法：url.format\(urlObject\)
 
 `url.parse(str)`的反向操作，没什么好说的。`urlObject`包含了很多字段，比如`protocol`、`slashes`、`protocol`等，且不一定需要全部传，所以有一套解析逻辑。
 
 过程比较冗长，大部分时候不需要用到，直接贴[官方文档](https://nodejs.org/api/url.html#url_url_format_urlobject)的链接，有需要再看。
 
-## url.resolve(from, to)
+## url.resolve\(from, to\)
 
 用法比较简单，直接贴官方文档的例子
 
@@ -186,8 +184,9 @@ url.resolve('http://example.com/one', '/two') // 'http://example.com/two'
 
 url字符是有哥下面的字符会被转义（非法字符）
 
->< > " ` \r \n \t { } | \ ^ '
+> &lt; &gt; " \` \r \n \t { } \| \ ^ '
 
 ## 相关链接
 
-官方文档：https://nodejs.org/api/url.html#url_url
+官方文档：[https:\/\/nodejs.org\/api\/url.html\#url\_url](https://nodejs.org/api/url.html#url_url)
+

@@ -10,7 +10,7 @@
   * 网络服务-https
   * 网络TCP-net
   * 网络UDP-dgram
-  * [网络地址解析-ur](/模块/url.md)l\(ok\)
+  * [网络地址解析-url\(ok\)](/模块/url.md)
   * 数据加密-crypto
   * [URL查询字符串-querystring\(ok\)](/模块/querystring.md)
   * 二进制数据-buffer

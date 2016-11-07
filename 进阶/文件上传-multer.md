@@ -29,6 +29,8 @@ npm install express multer multer --save
 
 ## 基础例子：单图上传
 
+完整示例代码请参考[这里](../examples/2016.11.07-advanced-express-multer/upload-single)。
+
 然后，添加如下代码。其中，`form.html`是上传图片的示例页面。
 
 ```javascript

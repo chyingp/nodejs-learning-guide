@@ -4,7 +4,7 @@
 
 常用的开源组件有**multer**、**formidable**等，借助这两个开源组件，可以轻松搞定图片上传。
 
-本文主要讲解以下内容，后续章节会对技术实现细节进行深入挖掘：
+本文主要讲解以下内容，后续章节会对技术实现细节进行深入挖掘。本文所有例子均有代码示例，可在[这里](../examples/2016.11.07-advanced-express-multer/)查看。
 
 * 基础例子：借助express、multer实现单图、多图上传。
 * 常用API：获取上传的图片的信息。
@@ -199,12 +199,16 @@ var upload = multer({ dest: 'upload/' });
 
 ### 自定义本地保存的文件名
 
+完整示例代码请参考[这里](../examples/2016.11.07-advanced-express-multer/upload-custom-filename)。
+
 代码稍微长一点，单同样简单。multer 提供了 **storage** 这个参数来对资源保存的路径、文件名进行个性化设置。
 
 使用注意事项如下：
 
 * destination：设置资源的保存路径。注意，如果没有这个配置项，默认会保存在 /tmp/uploads 下。此外，路径需要自己创建。
 * filename：设置资源保存在本地的文件名。
+
+[app.js](../examples/2016.11.07-advanced-express-multer/upload-custom-filename/app.js)。
 
 ```
 var fs = require('fs');
@@ -251,6 +255,16 @@ app.get('/form', function(req, res, next){
 });
 
 app.listen(3000);
+```
+
+[form.html](../examples/2016.11.07-advanced-express-multer/upload-custom-filename/form.html)。
+
+```html
+<form action="/upload" method="post" enctype="multipart/form-data">
+    <h2>单图上传</h2>
+    <input type="file" name="logo">
+    <input type="submit" value="提交">
+</form>
 ```
 
 ## 写在后面

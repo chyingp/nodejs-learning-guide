@@ -273,4 +273,13 @@ app.listen(3000);
 
 本文对multer的基础用法进行了介绍，并未涉及过多原理性的东西。俗话说 **授人以渔不如授人以渔**，在后续的章节里，会对文件上传的细节进行挖掘，好让读者朋友对文件上传加深进一步的认识。
 
+## 关于作者
+
+程序猿小卡，前腾讯IMWEB团队成员，阿里云栖社区专家认证博主。口号是：专注前端三十年。
+
+[github](https://github.com/chyingp) / [新浪微博](http://weibo.com/chyingp?is_all=1) / [知乎](https://www.zhihu.com/people/chen-ying-ping-57) / [博客园](http://chyingp.cnblogs.com/) / [Segmentfault](https://segmentfault.com/u/chyingp) / [云栖社区](https://yq.aliyun.com/users/1970729537231450?spm=5176.100240.searchblog.12.xDc8pM&do=login) / [站酷](http://www.zcool.com.cn/u/346408)
+
+
 ## 相关链接
+
+multer官方文档：https://github.com/expressjs/multer

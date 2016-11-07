@@ -31,7 +31,7 @@ npm install express multer multer --save
 
 完整示例代码请参考[这里](../examples/2016.11.07-advanced-express-multer/upload-single)。
 
-然后，添加如下代码。其中，`form.html`是上传图片的示例页面。
+[app.js](../examples/2016.11.07-advanced-express-multer/upload-single/app.js)。
 
 ```javascript
 var fs = require('fs');
@@ -56,7 +56,7 @@ app.listen(3000);
 ```
 
 
-相应的form表单如下
+[form.html](../examples/2016.11.07-advanced-express-multer/upload-single/form.html)。
 
 ```html
 <form action="/upload-single" method="post" enctype="multipart/form-data">
@@ -77,9 +77,11 @@ node app.js
 
 ## 基础例子：多图上传
 
-代码简直不能更简单，将 upload.single('logo') 改成 upload.array('logo', 2) 就行。
+完整示例代码请参考[这里](../examples/2016.11.07-advanced-express-multer/upload-multi)。
 
-表示：同时支持2张图片上传，并且 name 属性为 logo。
+代码简直不能更简单，将前面的 upload.single('logo') 改成 upload.array('logo', 2) 就行。表示：同时支持2张图片上传，并且 name 属性为 logo。
+
+[app.js](../examples/2016.11.07-advanced-express-multer/upload-multi/app.js)。
 
 ```javascript
 var fs = require('fs');
@@ -104,7 +106,9 @@ app.listen(3000);
 
 ```
 
-相应的form表单如下
+
+[form.html](../examples/2016.11.07-advanced-express-multer/upload-multi/form.html)。
+
 
 ```html
 <form action="/upload-multi" method="post" enctype="multipart/form-data">
@@ -119,12 +123,16 @@ app.listen(3000);
 
 ## 获取上传的图片的信息
 
+完整示例代码请参考[这里](../examples/2016.11.07-advanced-express-multer/upload-get-file-info)。
+
 很多时候，除了将图片保存在服务器外，我们还需要做很多其他事情，比如将图片的信息存到数据库里。
 
 常用的信息比如原始文件名、文件类型、文件大小、本地保存路径等。借助multer，我们可以很方便的获取这些信息。
 
 还是单文件上传的例子，此时，multer会将文件的信息写到 req.file 上，如下代码所示。
 
+
+[app.js](../examples/2016.11.07-advanced-express-multer/upload-get-file-info/app.js)。
 
 ```javascript
 var fs = require('fs');
@@ -154,6 +162,17 @@ app.get('/form', function(req, res, next){
 app.listen(3000);
 ```
 
+
+[form.html](../examples/2016.11.07-advanced-express-multer/upload-get-file-info/form.html)。
+
+```html
+<form action="/upload" method="post" enctype="multipart/form-data">
+    <h2>单图上传</h2>
+    <input type="file" name="logo">
+    <input type="submit" value="提交">
+</form>
+```
+
 启动服务，上传文件后，就会看到控制台下打印出的信息。
 
 ```bash
@@ -162,6 +181,7 @@ app.listen(3000);
 文件大小：18379
 文件保存路径：upload/b7e4bb22375695d92689e45b551873d9
 ```
+
 
 ## 自定义文件上传路径、名称
 

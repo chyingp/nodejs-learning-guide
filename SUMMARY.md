@@ -29,7 +29,7 @@
 
   * 模块机制-module
 
-  * 本地路径处理-path
+  * [本地路径处理-path(ok)](模块/path.md)
 
   * 逐行读取-readline
 

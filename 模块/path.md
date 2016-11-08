@@ -1,5 +1,7 @@
 ## 模块概览
 
+
+
 ## 获取路径/文件名/扩展名
 
 * 获取路径：path.dirname(filepath)
@@ -231,6 +233,154 @@ compare('不常用边界', function(){
 
 感兴趣的可以看下 path.normalize(filepath) 的node源码如下：[传送门](https://github.com/nodejs/node/blob/master/lib/path.js)
 
+## 文件路径分解/组合
+
+* path.format(pathObject)：将pathObject的root、dir、base、name、ext属性，按照一定的规则，组合成一个文件路径。
+* path.parse(filepath)：path.format()方法的反向操作。
+
+我们先来看看官网对相关属性的说明。
+
+首先是linux下
+
+```bash
+┌─────────────────────┬────────────┐
+│          dir        │    base    │
+├──────┬              ├──────┬─────┤
+│ root │              │ name │ ext │
+"  /    home/user/dir / file  .txt "
+└──────┴──────────────┴──────┴─────┘
+(all spaces in the "" line should be ignored -- they are purely for formatting)
+```
+
+
+然后是windows下
+
+```bash
+┌─────────────────────┬────────────┐
+│          dir        │    base    │
+├──────┬              ├──────┬─────┤
+│ root │              │ name │ ext │
+" C:\      path\dir   \ file  .txt "
+└──────┴──────────────┴──────┴─────┘
+(all spaces in the "" line should be ignored -- they are purely for formatting)
+```
+
+### path.format(pathObject)
+
+阅读相关API文档说明后发现，path.format(pathObject)中，pathObject的配置属性是可以进一步精简的。
+
+根据接口的描述来看，以下两者是等价的。
+
+* `root` vs `dir`：两者可以互相替换，区别在于，路径拼接时，`root`后不会自动加`/`，而`dir`会。
+* `base` vs `name+ext`：两者可以互相替换。
+
+```javascript
+var path = require('path');
+
+var p1 = path.format({
+  root: '/tmp/', 
+  base: 'hello.js'
+});
+console.log( p1 ); // 输出 /tmp/hello.js
+
+var p2 = path.format({
+  dir: '/tmp', 
+  name: 'hello',
+  ext: '.js'
+});
+console.log( p2 );  // 输出 /tmp/hello.js
+```
+
+### path.parse(filepath)
+
+path.format(pathObject) 的反向操作，直接上官网例子。
+
+四个属性，对于使用者是挺便利的，不过path.format(pathObject) 中也是四个配置属性，就有点容易搞混。
+
+```javascript
+path.parse('/home/user/dir/file.txt')
+// returns
+// {
+//    root : "/",
+//    dir : "/home/user/dir",
+//    base : "file.txt",
+//    ext : ".txt",
+//    name : "file"
+// }
+```
+
+## 获取相对路径
+
+接口：path.relative(from, to)
+
+描述：从`from`路径，到`to`路径的相对路径。
+
+边界：
+
+* 如果`from`、`to`指向同个路径，那么，返回空字符串。
+* 如果`from`、`to`中任一者为空，那么，返回当前工作路径。
+
+上例子：
+
+```javascript
+var path = require('path');
+
+var p1 = path.relative('/data/orandea/test/aaa', '/data/orandea/impl/bbb');
+console.log(p1);  // 输出 "../../impl/bbb"
+
+var p2 = path.relative('/data/demo', '/data/demo');
+console.log(p2);  // 输出 ""
+
+var p3 = path.relative('/data/demo', '');
+console.log(p3);  // 输出 "../../Users/a/Documents/git-code/nodejs-learning-guide/examples/2016.11.08-node-path"
+```
+
+
+## 平台相关接口/属性
+
+以下属性、接口，都跟平台的具体实现相关。也就是说，同样的属性、接口，在不同平台上的表现不同。
+
+* path.posix：path相关属性、接口的linux实现。
+* path.win32：path相关属性、接口的win32实现。
+* path.sep：路径分隔符。在linux上是`/`，在windows上是`\`。
+* path.delimiter：path设置的分割符。linux上是`:`，windows上是`;`。
+
+注意，当使用 path.win32 相关接口时，参数同样可以使用`/`做分隔符，但接口返回值的分割符只会是`\`。
+
+直接来例子更直观。
+
+```bash
+> path.win32.join('/tmp', 'fuck')
+'\\tmp\\fuck'
+> path.win32.sep
+'\\'
+> path.win32.join('\tmp', 'demo')
+'\\tmp\\demo'
+> path.win32.join('/tmp', 'demo')
+'\\tmp\\demo'
+```
+
+### path.delimiter
+
+linux系统例子：
+
+```bash
+console.log(process.env.PATH)
+// '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin'
+
+process.env.PATH.split(path.delimiter)
+// returns ['/usr/bin', '/bin', '/usr/sbin', '/sbin', '/usr/local/bin']
+```
+
+windows系统例子：
+
+```bash
+console.log(process.env.PATH)
+// 'C:\Windows\system32;C:\Windows;C:\Program Files\node\'
+
+process.env.PATH.split(path.delimiter)
+// returns ['C:\\Windows\\system32', 'C:\\Windows', 'C:\\Program Files\\node\\']
+```
 
 ## 相关链接
 

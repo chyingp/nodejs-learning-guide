@@ -228,10 +228,26 @@ connection event: 第3个请求！
 request event: 第3个请求！
 ```
 
-有依赖关系
+然后，再来看下有`keep-alive`的场景。用 postman 构造包含 keep-alive 的请求，最终的HTTP请求报文如下
+
+```http
+GET / HTTP/1.1
+Host: 127.0.0.1:3000
+Connection: keep-alive
+Cache-Control: no-cache
+Postman-Token: 6027fda7-f936-d3ac-e54f-dafcbf5e58ff
+```
+
+连续发送3个请求，服务端打印日志如下
+
+```bash
+connection event: 第1个请求！
+request event: 第1个请求！
+request event: 第2个请求！
+request event: 第3个请求！
+```
 
 
-有时间次序
 
 ## 不常用接口
 

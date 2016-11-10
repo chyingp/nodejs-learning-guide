@@ -1,3 +1,4 @@
+// 例子：在没有 keep-alive 的情况下，request、connection 的关系
 var http = require('http');
 var PORT = 3000;
 var requestIndex = 0;
@@ -12,8 +13,8 @@ server.on('request', function(req, res){
 	console.log('request event: 第'+ requestIndex +'个请求！');
 });
 
-server.on('connection', function(req, res){
-	connectionIndex++;
+server.on('connection', function(socket){
+	connectionIndex++;	
 	console.log('connection event: 第'+ connectionIndex +'个请求！');
 });
 

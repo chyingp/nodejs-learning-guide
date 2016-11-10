@@ -46,4 +46,17 @@ http.IncomingMessage实例 有三个属性需要注意：method、statusCode、s
 
 应该不难理解。
 
+## 关于继承与扩展
+
+http.Server 继承 net.Server
+
+http.ServerResponse 实现了 Writable Stream interface
+
+http.IncomingMessage 实现了 Readable Stream interface
+
+### http.IncomingMessage 与 socket
+
+(new http.IncomingMessage()).socket --> 获得跟这次连接相关的socket
+
+...
 

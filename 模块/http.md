@@ -48,15 +48,57 @@ http.IncomingMessage实例 有三个属性需要注意：method、statusCode、s
 
 ## 关于继承与扩展
 
-http.Server 继承 net.Server
+### http.Server
 
-http.ServerResponse 实现了 Writable Stream interface
+* http.Server 继承 net.Server （于是顺带需要学一下 net.Server 的API、属性、相关事件）
+* net.createServer(fn)，回调中的 `socket` 是个双工的stream接口，也就是说，读取发送方信息、向发送方发送信息都靠他。
 
-http.IncomingMessage 实现了 Readable Stream interface
+备注：socket的客户端、服务端是相对的概念，所以其实 net.Server 内部也是用了 net.Socket（不负责任猜想）
 
-### http.IncomingMessage 与 socket
+```js
+// 参考：https://cnodejs.org/topic/4fb1c1fd1975fe1e1310490b
+var net = require('net');
 
-(new http.IncomingMessage()).socket --> 获得跟这次连接相关的socket
+var PORT = 8989;
+var HOST = '127.0.0.1';
 
-...
+var server = net.createServer(function(socket){
+    console.log('Connected: ' + socket.remoteAddress + ':' + socket.remotePort);
+    
+    socket.on('data', function(data){
+        console.log('DATA ' + socket.remoteAddress + ': ' + data);
+        console.log('Data is: ' + data);
+
+        socket.write('Data from you is  "' + data + '"');
+    });
+
+    socket.on('close', function(){
+         console.log('CLOSED: ' +
+            socket.remoteAddress + ' ' + socket.remotePort);
+    });
+});
+server.listen(PORT, HOST);
+
+console.log(server instanceof net.Server);  // true
+```
+
+### http.ClientRequest
+
+http.ClientRequest 内部创建了一个socket来发起请求，[代码如下](https://github.com/nodejs/node/blob/master/lib/_http_client.js#L174)。
+
+当你调用 http.request(options) 时，内部是这样的
+
+```javascript
+self.onSocket(net.createConnection(options));
+
+```
+
+### http.ServerResponse 
+
+* 实现了 Writable Stream interface
+
+### http.IncomingMessage 
+
+* 实现了 Readable Stream interface，参考[这里](https://github.com/nodejs/node/blob/master/lib/_http_incoming.js#L62)
+* xx.socket --> 获得跟这次连接相关的socket
 

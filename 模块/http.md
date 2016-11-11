@@ -1,22 +1,27 @@
-## 模块概览
+## http模块概览
 
-nodejs的精华所在，无需赘言。
+大多数nodejs开发者都是冲着开发web server的目的选择了nodejs。正如官网所展示的，借助http模块，可以几行代码就搞定一个超迷你的web server。
 
-## 先来个例子
+在nodejs中，`http`可以说是最核心的模块，同时也是比较复杂的一个模块。上手很简单，但一旦深入学习，不少初学者就会觉得头疼，不知从何入手。
 
-在下面这个简单的例子里，涉及了4个实例
+本文先从一个简单的例子出发，引出`http`模块最核心的四个实例。看完本文，应该就能够对http模块有个整体的认识。
 
-* http.Server：http.createServer() 的返回值
-* http.ClientRequest：http.get() 的返回值
-* http.IncomingMessage：其实 server 例子里的 serverReq，以及 client 例子里的 clientRes 都是
-* http.ServerResponse：server例子里的 serverRes
+## 一个简单的例子
 
-```javascript
+在下面的例子中，我们创建了1个web服务器、1个http客户端
+
+* 服务器server：接收来自客户端的请求，并将客户端请求的地址返回给客户端。
+* 客户端client：向服务器发起请求，并将服务器返回的内容打印到控制台。
+
+代码如下所示，只有几行，但包含了不少信息量。下一小节会进行简单介绍。
+
+```js
 var http = require('http');
 
 // http server 例子
 var server = http.createServer(function(serverReq, serverRes){
-    serverRes.end('hello');
+    var url = serverReq.url;
+    serverRes.end( '您访问的地址是：' + url );
 });
 
 server.listen(3000);
@@ -27,6 +32,15 @@ var client = http.get('http://127.0.0.1:3000', function(clientRes){
 });
 
 ```
+
+## 例子解释
+
+在上面这个简单的例子里，涉及了4个实例
+
+* server：http.Server实例，用来提供服务，处理客户端的请求。
+* client：http.ClientReques实例，用来向服务端发起请求。
+* serverReq/clientRes：其实都是 http.IncomingMessage实。serverReq 用来获取客户端请求的相关信息，如request header；而clientRes用来获取服务端返回的相关信息，比如response header。
+* serverRes：http.ServerResponse实例
 
 ## 关于http.IncomingMessage、http.ServerResponse
 

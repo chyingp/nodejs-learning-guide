@@ -1,13 +1,29 @@
 ## 概览
 
-本文的重点会放在`req`这个对象上。前面已经提到过了，可以用它来获取请求方的相关信息，如request header等。
+本文的重点会放在`req`这个对象上。前面已经提到，它其实是http.IncomingMessage实例，在服务端、客户端作用略微有差异
+
+* 服务端处：获取请求方的相关信息，如request header等。
+* 客户端处：获取响应方返回的相关信息，如statusCode等。
+
+服务端例子：
 
 ```js
+// 下面的 req
 var http = require('http');
 var server = http.createServer(function(req, res){
     res.send('ok');
 });
 server.listen(3000);
+```
+
+客户端例子
+
+```js
+// 下面的res
+var http = require('http');
+http.get('http://127.0.0.1:3000', function(res){
+
+});
 ```
 
 ## httpVersion/method/url
@@ -130,7 +146,7 @@ Cache-Control: no-cache
 nick=casper&hello=world
 ```
 
-## 分不清差异的事件：aborted、close
+## 服务端事件：aborted、close
 
 官方文档对这两个事件的解释是：当客户端终止请求时，触发aborted事件；当客户端连接断开时，触发close事件；官方文档传送们：[地址](https://nodejs.org/api/http.html#http_event_aborted_1)
 
@@ -189,15 +205,54 @@ server.listen(3000, function(){
   }
 ```
 
-TODO ：客户端侧的aborted、close事件在什么场景下触发？
+## 客户端事件：aborted、close
+
+猜测客户端的aborted、close也是在类似场景下触发，测试代码如下。发现一个比较有意思的情况，`res.pipe(process.stdout)` 这行代码是否添加，会影响`close`是否触发。
+
+* 没有`res.pipe(process.stdout)`：close不触发。
+* 有`res.pipe(process.stdout)`：close触发。
+
+```js
+var http = require('http');
+
+var server = http.createServer(function(req, res){
+    
+    console.log('1、服务端：收到客户端请求');
+    
+    res.flushHeaders();
+    res.setTimeout(100);    // 故意不返回，3000ms后超时
+});
 
 
+server.on('error', function(){});
+
+server.listen(3000, function(){
+
+    var client = http.get('http://127.0.0.1:3000/aborted', function(res){
+
+        console.log('2、客户端：收到服务端响应');
+
+        // res.pipe(process.stdout); 注意这行代码
+        
+        res.on('aborted', function(){
+            console.log('3、客户端：aborted触发！');
+        });
+
+        res.on('close', function(){
+            console.log('4、客户端：close触发！');
+        });     
+    });
+});
+```
 
 ## 不常用属性
 
-* rawHeaders：
-* trailers：
+* rawHeaders：未解析前的request header。
+* trailers：在分块传输编码(chunk)中用到，表示trailer后的header可分块传输。（感兴趣的可以研究下）
 * rawTrailers：
+
+关于trailers属性：
+>The request/response trailers object. Only populated at the 'end' event.
 
 ## 相关链接
 

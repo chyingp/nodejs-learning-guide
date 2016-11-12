@@ -130,6 +130,75 @@ Cache-Control: no-cache
 nick=casper&hello=world
 ```
 
+## 分不清差异的事件：aborted、close
+
+官方文档对这两个事件的解释是：当客户端终止请求时，触发aborted事件；当客户端连接断开时，触发close事件；官方文档传送们：[地址](https://nodejs.org/api/http.html#http_event_aborted_1)
+
+反正我看了是一头雾水，根据实际测试结果来看：
+
+* 当客户端abort请求时，服务端req的aborted、close事件都会触发；
+* 客户端请求正常完成时，服务端req的close事件都不会会触发；
+
+直接扒了下nodejs的源代码，发现的确是同时触发的，触发场景：请求正常结束前，客户端abort请求。
+
+测试代码如下：
+
+```js
+var http = require('http');
+
+var server = http.createServer(function(req, res){
+    
+    console.log('1、收到客户端请求: ' + req.url);
+    
+    req.on('aborted', function(){
+        console.log('2、客户端请求aborted');
+    });
+    
+    req.on('close', function(){
+        console.log('3、客户端请求close');
+    });
+    
+    // res.end('ok'); 故意不返回，等着客户端中断请求
+});
+
+server.listen(3000, function(){
+    var client = http.get('http://127.0.0.1:3000/aborted');
+    setTimeout(function(){
+        client.abort();  // 故意延迟100ms，确保请求发出
+    }, 100);    
+});
+
+
+// 输出如下
+// 1、收到客户端请求: /aborted
+// 2、客户端请求aborted
+// 3、客户端请求close
+```
+
+
+以下代码来自nodejs源码（_http_server.js）
+
+```js
+  function abortIncoming() {
+    while (incoming.length) {
+      var req = incoming.shift();
+      req.emit('aborted');
+      req.emit('close');
+    }
+    // abort socket._httpMessage ?
+  }
+```
+
+TODO ：客户端侧的aborted、close事件在什么场景下触发？
+
+
+
+## 不常用属性
+
+* rawHeaders：
+* trailers：
+* rawTrailers：
+
 ## 相关链接
 
 官方文档：

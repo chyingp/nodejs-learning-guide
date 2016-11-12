@@ -11,6 +11,7 @@
 // 下面的 req
 var http = require('http');
 var server = http.createServer(function(req, res){
+    console.log(req.headers);
     res.send('ok');
 });
 server.listen(3000);
@@ -22,11 +23,35 @@ server.listen(3000);
 // 下面的res
 var http = require('http');
 http.get('http://127.0.0.1:3000', function(res){
-
+    console.log(res.statusCode);
 });
 ```
 
-## httpVersion/method/url
+## 属性/方法/事件 分类
+
+http.IncomingMessage的属性/方法/事件 不是特别多，按照是否客户端/服务端 特有的，下面进行简单归类。可以看到
+
+* 服务端处特有：url
+* 客户端处特有：statusCode、statusMessage
+
+| 类型      |     名称 |   服务端   |  客户端  |
+| :-------- | :--------:| :------: | :---: |
+| 事件    |   aborted |  ✓  |   ✓   |
+| 事件    |   close |  ✓  |   ✓   |
+| 属性    |   headers |  ✓  |   ✓   |
+| 属性    |   rawHeaders |  ✓  |   ✓   |
+| 属性    |   statusCode |  ✕  |   ✓   |
+| 属性    |   statusMessage |  ✕  |   ✓   |
+| 属性    |   httpVersion |  ✓  |   ✓   |
+| 属性    |   httpVersion |  ✓  |   ✓   |
+| 属性    |   url |  ✓  |   ✕   |
+| 属性    |   socket |  ✓  |   ✓   |
+| 方法    |   .destroy() |  ✓  |   ✓   |
+| 方法    |   .setTimeout() |  ✓  |   ✓   |
+
+## 服务端的例子
+
+### 例子一：获取httpVersion/method/url
 
 下面是一个典型的HTTP请求报文，里面最重要的内容包括：HTTP版本、请求方法、请求地址、请求头部。
 
@@ -64,7 +89,7 @@ server.listen(3000);
 4、http headers：{"host":"127.0.0.1:3000","connection":"keep-alive","cache-control":"no-cache","user-agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36","postman-token":"1148986a-ddfb-3569-e2c0-585634655fe4","accept":"*/*","accept-encoding":"gzip, deflate, sdch, br","accept-language":"zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4"}
 ```
 
-## 获取get请求参数
+### 例子二：获取get请求参数
 
 服务端代码如下：
 
@@ -95,7 +120,7 @@ server.listen(3000);
 {"nick":"chyingp","hello":"world"}
 ```
 
-## 获取post请求参数
+### 例子三：获取post请求参数
 
 服务端代码如下
 
@@ -146,14 +171,52 @@ Cache-Control: no-cache
 nick=casper&hello=world
 ```
 
-## 服务端事件：aborted、close
+## 客户端处例子
+
+### 例子一：获取httpVersion/statusCode/statusMessage
+
+代码如下：
+
+```js
+var http = require('http');
+var server = http.createServer(function(req, res){
+    res.writeHead(200, {'content-type': 'text/plain',});
+    res.end('from server');
+});
+server.listen(3000);
+
+var client = http.get('http://127.0.0.1:3000', function(res){
+    console.log('1、http版本：' + res.httpVersion);
+    console.log('2、返回状态码：' + res.statusCode);
+    console.log('3、返回状态描述信息：' + res.statusMessage);
+    console.log('4、返回正文：');
+
+    res.pipe(process.stdout);
+});
+```
+
+控制台输出：
+
+```bash
+1、http版本：1.1
+2、返回状态码：200
+3、返回状态描述信息：OK
+4、返回正文：
+from server
+```
+
+## 事件对比：aborted、close
 
 官方文档对这两个事件的解释是：当客户端终止请求时，触发aborted事件；当客户端连接断开时，触发close事件；官方文档传送们：[地址](https://nodejs.org/api/http.html#http_event_aborted_1)
 
-反正我看了是一头雾水，根据实际测试结果来看：
+解释得比较含糊，从实际实验对比上来看，跟官方文档有不小出入。此外，客户端处、服务端处的表现也是不同的。
 
-* 当客户端abort请求时，服务端req的aborted、close事件都会触发；
-* 客户端请求正常完成时，服务端req的close事件都不会会触发；
+### 服务端表现
+
+根据实际测试结果来看，当客户端：
+
+* abort请求时，服务端req的aborted、close事件都会触发；（诡异）
+* 请求正常完成时，服务端req的close事件不会触发；（也很诡异）
 
 直接扒了下nodejs的源代码，发现的确是同时触发的，触发场景：请求正常结束前，客户端abort请求。
 
@@ -191,7 +254,6 @@ server.listen(3000, function(){
 // 3、客户端请求close
 ```
 
-
 以下代码来自nodejs源码（_http_server.js）
 
 ```js
@@ -205,7 +267,43 @@ server.listen(3000, function(){
   }
 ```
 
-## 客户端事件：aborted、close
+再来一波对比，`req.on('close')`和`req.socket.on('close')`。
+
+```js
+// reqSocketClose.js
+var http = require('http');
+
+var server = http.createServer(function(req, res){
+    
+    console.log('server: 收到客户端请求');
+    
+    req.on('close', function(){
+        console.log('server: req close');
+    });
+    
+    req.socket.on('close', function(){
+        console.log('server: req.socket close');
+    });    
+    
+    res.end('ok'); 
+});
+
+server.listen(3000);
+
+var client = http.get('http://127.0.0.1:3000/aborted', function(res){
+    console.log('client: 收到服务端响应');
+});
+```
+
+输出如下，正儿八经的close事件触发了。
+
+```bash
+server: 收到客户端请求
+server: req.socket close
+client: 收到服务端响应
+```
+
+### 客户端表现
 
 猜测客户端的aborted、close也是在类似场景下触发，测试代码如下。发现一个比较有意思的情况，`res.pipe(process.stdout)` 这行代码是否添加，会影响`close`是否触发。
 
@@ -245,6 +343,54 @@ server.listen(3000, function(){
 });
 ```
 
+## 信息量略大的 .destroy()
+
+经过前面aborted、close的摧残，本能的觉得 .destroy() 方法的表现会有很多惊喜之处。
+
+测试代码如下：
+
+```js
+var http = require('http');
+
+var server = http.createServer(function(req, res){
+    
+    console.log('服务端：收到客户端请求');
+    
+    req.destroy(new Error('测试destroy'));
+    
+    req.on('error', function(error){
+        console.log('服务端：req error: ' + error.message);
+    });
+    
+    req.socket.on('error', function(error){
+        console.log('服务端：req socket error: ' + error.message);
+    })
+});
+
+server.on('error', function(error){
+    console.log('服务端：server error: ' + error.message);
+});
+
+server.listen(3000, function(){
+
+    var client = http.get('http://127.0.0.1:3000/aborted', function(res){
+        // do nothing
+    });
+
+    client.on('error', function(error){
+        console.log('客户端：client error触发！' + error.message);
+    });
+});
+```
+
+输出如下。根据 .destroy() 调用的时机不同，error 触发的对象不同。（测试过程比较枯燥，有时间再总结一下）
+
+```bash
+服务端：收到客户端请求
+服务端：req socket error: 测试destroy
+客户端：client error触发！socket hang up
+```
+
 ## 不常用属性
 
 * rawHeaders：未解析前的request header。
@@ -253,6 +399,10 @@ server.listen(3000, function(){
 
 关于trailers属性：
 >The request/response trailers object. Only populated at the 'end' event.
+
+## 写在后面
+
+一个貌似很简单的对象，实际比想的要复杂一些。做了不少对比实验，也发现了一些好玩的东西，打算深入学习的同学可以自己多动手尝试一下 :)
 
 ## 相关链接
 

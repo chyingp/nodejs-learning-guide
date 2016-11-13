@@ -159,5 +159,77 @@ res.write() API的信息量略大，建议看下[官方文档](https://nodejs.or
 
 >Returns true if the entire data was flushed successfully to the kernel buffer. Returns false if all or part of the data was queued in user memory. 'drain' will be emitted when the buffer is free again.
 
+## chunk数据
 
+参考这里：http://stackoverflow.com/questions/6258210/how-can-i-output-data-before-i-end-the-response
 
+也就是说，除了nodejs的特性，还需要了解 HTTP协议、浏览器的具体实现。（细思极恐）
+
+如果是 `text/html`
+
+```js
+var http = require('http');
+
+http.createServer(function(request, response) {
+
+    response.setHeader('Connection', 'Transfer-Encoding');
+    response.setHeader('Content-Type', 'text/html; charset=utf-8');
+    response.setHeader('Transfer-Encoding', 'chunked');
+
+    response.write('hello');
+
+    setTimeout(function() {
+        response.write(' world!');
+        response.end();
+    }, 10000);
+
+}).listen(8888);
+```
+
+如果是 `text/plain`
+
+```js
+ar http = require('http');
+
+http.createServer(function (req, res) {
+    res.writeHead(200, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
+        'X-Content-Type-Options': 'nosniff'
+    });
+    res.write('Beginning\n');
+    var count = 10;
+    var io = setInterval(function() {
+        res.write('Doing ' + count.toString() + '\n');
+        count--;
+        if (count === 0) {
+            res.end('Finished\n');
+            clearInterval(io);
+        }
+    }, 1000);
+}).listen(8888);
+```
+
+失败例子
+
+```js
+var http = require('http');
+
+var server = http.createServer(function(req, res){
+    res.writeHead(200, 'ok', {
+        'Content-Type': 'text/html'
+    });
+    res.write('hello');
+    
+    setTimeout(function(){
+        res.end('world');
+    }, 5000);
+});
+
+server.listen(3000);
+```
+
+## 相关链接
+
+How can I output data before I end the response?
+http://stackoverflow.com/questions/6258210/how-can-i-output-data-before-i-end-the-response

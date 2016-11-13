@@ -159,6 +159,17 @@ res.write() API的信息量略大，建议看下[官方文档](https://nodejs.or
 
 >Returns true if the entire data was flushed successfully to the kernel buffer. Returns false if all or part of the data was queued in user memory. 'drain' will be emitted when the buffer is free again.
 
+### response.end([data][, encoding][, callback])
+
+掌握了 res.write() 的话，res.end() 就很简单了。res.end() 的用处是告诉nodejs，header、body都给你了，这次响应就到这里吧。
+
+有点像个语法糖，可以看成下面两个调用的组合。至于callback，当响应传递结束后触发。
+
+```js
+res.write(data, encoding);
+res.end()
+```
+
 ## chunk数据
 
 参考这里：http://stackoverflow.com/questions/6258210/how-can-i-output-data-before-i-end-the-response
@@ -170,44 +181,36 @@ res.write() API的信息量略大，建议看下[官方文档](https://nodejs.or
 ```js
 var http = require('http');
 
-http.createServer(function(request, response) {
-
-    response.setHeader('Connection', 'Transfer-Encoding');
-    response.setHeader('Content-Type', 'text/html; charset=utf-8');
-    response.setHeader('Transfer-Encoding', 'chunked');
-
-    response.write('hello');
+http.createServer(function(req, res) {    
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.write('hello');
 
     setTimeout(function() {
-        response.write(' world!');
-        response.end();
-    }, 10000);
+        res.write(' world!');
+        res.end();
+    }, 2000);
 
-}).listen(8888);
+}).listen(3000);
 ```
 
 如果是 `text/plain`
 
 ```js
-ar http = require('http');
+var http = require('http');
 
 http.createServer(function (req, res) {
     res.writeHead(200, {
         'Content-Type': 'text/plain; charset=utf-8',
-        'Transfer-Encoding': 'chunked',
         'X-Content-Type-Options': 'nosniff'
     });
-    res.write('Beginning\n');
-    var count = 10;
-    var io = setInterval(function() {
-        res.write('Doing ' + count.toString() + '\n');
-        count--;
-        if (count === 0) {
-            res.end('Finished\n');
-            clearInterval(io);
-        }
-    }, 1000);
-}).listen(8888);
+    res.write('hello');
+
+    setTimeout(function(){
+        res.write('world');
+        res.end()
+    }, 2000);
+    
+}).listen(3000);
 ```
 
 失败例子
@@ -222,12 +225,14 @@ var server = http.createServer(function(req, res){
     res.write('hello');
     
     setTimeout(function(){
-        res.end('world');
-    }, 5000);
+        res.write('world');
+        res.end();
+    }, 2000);
 });
 
 server.listen(3000);
 ```
+
 
 ## 相关链接
 

@@ -105,3 +105,59 @@ var server = http.createServer(function(req, res){
 server.listen(3000);
 ```
 
+### 其他响应头部操作
+
+增、删、改、查 是配套的。下面分别举例说明下，例子太简单就直接上代码了。
+
+```js
+// 增
+res.setHeader('Content-Type', 'text/plain');
+
+// 删
+res.removeHeader('Content-Type');
+
+// 改
+res.setHeader('Content-Type', 'text/plain');
+res.setHeader('Content-Type', 'text/html');  // 覆盖
+
+// 查
+res.getHeader('content-type');
+```
+
+其中略显不同的是 res.getHeader(name)，name 用的是小写，返回值没做特殊处理。
+
+```js
+res.setHeader('Content-Type', 'TEXT/HTML');
+console.log( res.getHeader('content-type') );  // TEXT/HTML
+
+res.setHeader('Content-Type', 'text/plain');
+console.log( res.getHeader('content-type') );  // text/plain
+```
+
+此外，还有不那么常用的：
+
+* res.headersSent：header是否已经发送；
+* res.sendDate：默认为true。但为true时，会在response header里自动设置Date首部。
+
+## 设置响应主体
+
+主要用到 res.write() 以及 res.end() 两个方法。
+
+res.write() API的信息量略大，建议看下[官方文档](https://nodejs.org/api/http.html#http_response_write_chunk_encoding_callback)。
+
+### response.write(chunk[, encoding][, callback])
+
+* chunk：响应主体的内容，可以是string，也可以是buffer。当为string时，encoding参数用来指明编码方式。（默认是utf8）
+* encoding：编码方式，默认是 utf8。
+* callback：当响应体flushed时触发。（TODO 这里想下更好的解释。。。）
+
+使用上没什么难度，只是有些注意事项：
+
+1. 如果 res.write() 被调用时， res.writeHead() 还没被调用过，那么，就会把header flush出去。
+2. res.write() 可以被调用多次。
+3. 当 res.write(chunk) 第一次被调用时，node 会将 header 信息 以及 chunk 发送到客户端。第二次调用 res.write(chunk) ，node 会认为你是要streaming data（WTF，该怎么翻译）。。。
+
+>Returns true if the entire data was flushed successfully to the kernel buffer. Returns false if all or part of the data was queued in user memory. 'drain' will be emitted when the buffer is free again.
+
+
+

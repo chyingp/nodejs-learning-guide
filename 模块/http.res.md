@@ -233,6 +233,14 @@ var server = http.createServer(function(req, res){
 server.listen(3000);
 ```
 
+## 超时处理
+
+接口：response.setTimeout(msecs, callback)
+
+关于 timeout 事件的说明，同样是言简意赅（WTF），话少信息量大，最好来个demo TODO
+
+>If no 'timeout' listener is added to the request, the response, or the server, then sockets are destroyed when they time out. If you assign a handler on the request, the response, or the server's 'timeout' events, then it is your responsibility to handle timed out sockets.
+
 ## 其他不常用属性/方法
 
 * response.finished：一开始是false，响应结束后，设置为true。

@@ -233,8 +233,18 @@ var server = http.createServer(function(req, res){
 server.listen(3000);
 ```
 
+## 其他不常用属性/方法
+
+* response.finished：一开始是false，响应结束后，设置为true。
+* response.sendDate：默认是true。是否自动设置Date头部。（按HTTP协议是必须要的，除非是调试用，不然不要设置为false）
+* response.headersSent：只读属性。响应头部是否已发送。
+* response.writeContinue()：发送  HTTP/1.1 100 Continue 消息给客户端，提示说服务端愿意接受客户端的请求，请继续发送请求正文（body)。（TODO 做个demo啥的是大大的好）
+
 
 ## 相关链接
 
 How can I output data before I end the response?
 http://stackoverflow.com/questions/6258210/how-can-i-output-data-before-i-end-the-response
+
+8.2.3 Use of the 100 (Continue) Status
+http://greenbytes.de/tech/webdav/rfc2616.html#use.of.the.100.status

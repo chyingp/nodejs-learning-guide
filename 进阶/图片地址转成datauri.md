@@ -54,7 +54,7 @@ console.log(datauri);
 
 ## github demo地址
 
-demo地址请[点击这里](../examples/2016.11.15-base64-datauri)，或者
+demo地址请[点击这里](https://github.com/chyingp/nodejs-learning-guide/tree/master/examples/2016.11.15-base64-datauri)，或者
 
 ```bash
 git clone https://github.com/chyingp/nodejs-learning-guide.git
@@ -62,7 +62,7 @@ cd nodejs-learning-guide/examples/2016.11.15-base64-datauri
 node server.js
 ```
 
-然后在浏览器访问 http://127.0.0.1:3000，就可以看到效果 :)
+然后在浏览器访问 [http://127.0.0.1:3000](http://127.0.0.1:3000)，就可以看到效果 :)
 
 ## 相关链接
 

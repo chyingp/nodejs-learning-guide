@@ -241,6 +241,11 @@ server.listen(3000);
 
 >If no 'timeout' listener is added to the request, the response, or the server, then sockets are destroyed when they time out. If you assign a handler on the request, the response, or the server's 'timeout' events, then it is your responsibility to handle timed out sockets.
 
+## 事件 close/finish
+
+* close：response.end() 被调用前，连接就断开了。此时会触发这个事件。
+* finish：响应header、body都已经发送出去（交给操作系统，排队等候传输），但客户端是否实际收到数据为止。（这个事件后，res 上就不会再有其他事件触发）
+
 ## 其他不常用属性/方法
 
 * response.finished：一开始是false，响应结束后，设置为true。

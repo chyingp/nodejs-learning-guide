@@ -38,5 +38,6 @@
 
 * 进阶使用
   * [基于express+muter的文件上传](进阶/文件上传-multer.md)
+  * [将图片转成datauri嵌入到html](/进阶/图片地址转成datauri.md)
 
 

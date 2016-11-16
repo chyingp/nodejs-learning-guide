@@ -7,6 +7,10 @@ net模块是同样是nodejs的核心模块。在http模块概览里提到，http
 * net.Server：TCP server，内部通过socket来实现与客户端的通信。
 * net.Socket：tcp/本地 socket的node版实现，它实现了全双工的stream接口。
 
+本文从一个简单的 tcp服务端/客户端 的例子开始讲解，好让读者有个概要的认识。接着再分别介绍 net.Server、net.Socket 比较重要的API、属性、事件。
+
+对于初学者，建议把文中的例子本地跑一遍加深理解。
+
 ## 简单的 server+client 例子
 
 tcp服务端程序如下：
@@ -82,7 +86,7 @@ client.end('你好，我是客户端');
 客户端：连接断开
 ```
 
-## 服务端
+## 服务端 net.Server
 
 ### server.address()
 

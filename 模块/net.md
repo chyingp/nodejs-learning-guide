@@ -14,7 +14,7 @@ tcp服务端程序如下：
 ```js
 var net = require('net');
 
-var PORT = 8989;
+var PORT = 3000;
 var HOST = '127.0.0.1';
 
 // tcp服务端
@@ -42,7 +42,7 @@ tcp客户端如下：
 ```js
 var net = require('net');
 
-var PORT = 8989;
+var PORT = 3000;
 var HOST = '127.0.0.1';
 
 // tcp客户端
@@ -234,6 +234,77 @@ curl http://127.0.0.1:3000
 2. connection 触发
 ```
 
-## 客户端
+## 客户端 net.Socket
+
+在文章开头已经举过客户端的例子，这里再把例子贴一下。(备注：严格来说不应该把 net.Socket 叫做客户端，这里方便讲解而已)
+
+单从node官方文档来看的话，感觉 net.Socket 比 net.Server 要复杂很多，有更多的API、事件、属性。但实际上，把 net.Socket 相关的API、事件、属性 进行归类下，会发现，其实也不是特别复杂。
+
+具体请看下一小节内容。
+
+```js
+var net = require('net');
+
+var PORT = 3000;
+var HOST = '127.0.0.1';
+
+// tcp客户端
+var client = net.createConnection(PORT, HOST);
+
+client.on('connect', function(){
+    console.log('客户端：已经与服务端建立连接');
+});
+
+client.on('data', function(data){
+    console.log('客户端：收到服务端数据，内容为{'+ data +'}');
+});
+
+client.on('close', function(data){
+    console.log('客户端：连接断开');
+});
+
+client.end('你好，我是客户端');
+```
+
+## API、属性归类
+
+### 连接相关
+
+* socket.connect()：有3种不同的参数，用于不同的场景；
+* socket.setTimeout()：用来进行连接超时设置。
+* socket.setKeepAlive()：用来设置长连接。
+* socket.destroy(）、socket.destroyed：当错误发生时，用来销毁socket，确保这个socket上不会再有其他的IO操作。
+
+### 数据读、写相关
+
+socket.write()、socket.end()、socket.pause()、socket.resume()、socket.setEncoding()、socket.setNoDelay()
+
+### 数据属性相关
+
+socket.bufferSize、socket.bytesRead、socket.bytesWritten
+
+### 事件循环相关
+
+socket.ref()、socket.unref()
+
+### 地址相关
+
+* socket.address()
+* socket.remoteAddress、socket.remoteFamily、socket.remotePort
+* socket.localAddress/socket.localPort
+
+## 事件简介
+
+* data：当收到另一侧传来的数据时触发。
+* connect：当连接建立时触发。
+* close：连接断开时触发。如果是因为传输错误导致的连接断开，则参数为error。
+* end：当连接另一侧发送了 FIN 包的时候触发（读者可以回顾下HTTP如何断开连接的）。默认情况下（allowHalfOpen == false），socket会完成自我销毁操作。但你也可以把 allowHalfOpen 设置为 true，这样就可以继续往socket里写数据。当然，最后你需要手动调用 socket.end()
+* error：当有错误发生时，就会触发，参数为error。（官方文档基本一句话带过，不过考虑到出错的可能太多，也可以理解）
+* timeout：提示用户，socket 已经超时，需要手动关闭连接。
+* drain：当写缓存空了的时候触发。（不是很好描述，具体可以看下stream的介绍）
+* lookup：域名解析完成时触发。
 
 ## 相关链接
+
+官方文档：
+https://nodejs.org/api/net.html#net_socket_destroy_exception

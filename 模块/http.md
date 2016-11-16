@@ -35,7 +35,7 @@ var client = http.get('http://127.0.0.1:3000', function(clientRes){
 
 ## 例子解释
 
-在上面这个简单的例子里，涉及了4个实例
+在上面这个简单的例子里，涉及了4个实例。大部分时候，serverReq、serverRes 才是主角。
 
 * server：http.Server实例，用来提供服务，处理客户端的请求。
 * client：http.ClientReques实例，用来向服务端发起请求。
@@ -44,9 +44,7 @@ var client = http.get('http://127.0.0.1:3000', function(clientRes){
 
 ## 关于http.IncomingMessage、http.ServerResponse
 
-大部分时候，http.IncomingMessage、http.ServerResponse才是主角。
-
-先讲下 http.ServerResponse实例。作用很明确，服务端通过http.ServerResponse 实例，来个请求方发送数据。包括发送响应表头，发送响应主体等。
+先讲下 http.ServerResponse 实例。作用很明确，服务端通过http.ServerResponse 实例，来个请求方发送数据。包括发送响应表头，发送响应主体等。
 
 接下来是 http.IncomingMessage 实例，由于在 server、client 都出现了，初学者难免有点迷茫。它的作用是
 
@@ -58,13 +56,11 @@ http.IncomingMessage实例 有三个属性需要注意：method、statusCode、s
 * method：只在 server 端的实例有（也就是 serverReq.method）
 * statusCode/statusMessage：只在 client 端 的实例有（也就是 clientRes.method）
 
-应该不难理解。
-
 ## 关于继承与扩展
 
 ### http.Server
 
-* http.Server 继承 net.Server （于是顺带需要学一下 net.Server 的API、属性、相关事件）
+* http.Server 继承了 net.Server （于是顺带需要学一下 net.Server 的API、属性、相关事件）
 * net.createServer(fn)，回调中的 `socket` 是个双工的stream接口，也就是说，读取发送方信息、向发送方发送信息都靠他。
 
 备注：socket的客户端、服务端是相对的概念，所以其实 net.Server 内部也是用了 net.Socket（不负责任猜想）
@@ -109,10 +105,10 @@ self.onSocket(net.createConnection(options));
 
 ### http.ServerResponse 
 
-* 实现了 Writable Stream interface
+* 实现了 Writable Stream interface，内部也是通过socket来发送信息。
 
 ### http.IncomingMessage 
 
 * 实现了 Readable Stream interface，参考[这里](https://github.com/nodejs/node/blob/master/lib/_http_incoming.js#L62)
-* xx.socket --> 获得跟这次连接相关的socket
+* req.socket --> 获得跟这次连接相关的socket
 

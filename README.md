@@ -1,6 +1,6 @@
 ## Nodejs学习笔记
 
-Nodejs学习过程中的一些总结，包括：（请 [点击这里查看完整版](https://github.com/chyingp/nodejs-learning-guide) ）
+Nodejs学习过程中的一些总结，包括：（请 [点击这里查看完整版](https://github.com/chyingp/nodejs-learning-guide) ），欢迎入群交流，群号 197339705 。
 
 * 基础：核心模块常用API 的使用、注意事项。（含可执行的demo）
 * 进阶：项目实战经验总结，含常用框架、库介绍，从编码到服务端部署运维。

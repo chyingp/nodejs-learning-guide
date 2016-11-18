@@ -1,6 +1,7 @@
 ## Nodejs学习笔记
 
-Nodejs学习过程中的一些总结，包括：（请 [点击这里查看完整版](https://github.com/chyingp/nodejs-learning-guide) ），欢迎入群交流，群号 197339705 。
+Nodejs学习过程中的一些总结，包括：（请 [点击这里查看完整版](https://github.com/chyingp/nodejs-learning-guide) ），欢迎入群交流，群号 197339705 。<a target="_blank" href="http://shang.qq.com/wpa/qunwpa?idkey=7e4f670e1cd9278f30003965a1cc068a4f30d8c73aa071c8da189f4842dbbee6"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="express/node交流群" title="express/node交流群"></a>
+
 
 * 基础：核心模块常用API 的使用、注意事项。（含可执行的demo）
 * 进阶：项目实战经验总结，含常用框架、库介绍，从编码到服务端部署运维。

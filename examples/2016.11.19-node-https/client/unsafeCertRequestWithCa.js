@@ -1,19 +1,22 @@
 // 例子：指定根证书
 var https = require('https');
 var fs = require('fs');
-var ca = fs.readFileSync('./srca.cer');
+// var ca = fs.readFileSync('./srca.cer');
+// var ca = fs.readFileSync('./srca.cer.pem');
+var ca = fs.readFileSync('./srca2.pem');
 
 var options = {	
 	hostname: 'kyfw.12306.cn',
 	path: '/otn/leftTicket/init',
-	// cert: fs.readFileSync('./srca.cer'),
-	ca: [ca],
-	rejectUnauthorized: true,
-	requestCert: true,
+	ca: [ ca ]
+	// cert: fs.readFileSync('./fuck.cer'),
+	// ca: [ca],
+	// rejectUnauthorized: false,
+	// requestCert: true,
 	// agent: false
 };
 
-console.log(ca);
+// console.log(ca);
 
 options.agent = new https.Agent(options);
 
@@ -23,7 +26,10 @@ var req = https.request(options, function(res){
 	// console.log( raw );
 	// fs.writeFileSync('./fuck.cer', raw);
 
-	// res.pipe(process.stdout);
+	res.pipe(process.stdout);
+	// var cert = res.socket.getPeerCertificate();
+	// fs.writeFileSync('./fuck.cer', cert.raw);
+	// console.log('hello');
 });
 
 req.on('error', function(err){

@@ -2,6 +2,8 @@
 
 关于这个模块的重要性，基本不用强调了，在网络安全问题日以严峻的今天，HTTPS是个必然的趋势。
 
+备注：本节还没写完，所有有点乱（-_-|||）
+
 ## 客户端例子
 
 跟http模块的用法非常像，只不过请求的地址是https协议的而已。
@@ -77,6 +79,83 @@ TODO
 。。。
 
 
+## 服务器：自签名证书
+
+```bash
+➜  server git:(master) ✗ mkdir cert
+➜  server git:(master) ✗ cd cert 
+➜  cert git:(master) ✗ openssl genrsa -out chyingp-key.pem 2048
+Generating RSA private key, 2048 bit long modulus
+.............................+++
+..........................................+++
+e is 65537 (0x10001)
+➜  cert git:(master) ✗ openssl req -new -sha256 -key chyingp-key.pem -out chyingp-csr.pem
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:CN
+State or Province Name (full name) [Some-State]:Guangdong
+Locality Name (eg, city) []:Shenzhen
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:YH
+Organizational Unit Name (eg, section) []:web
+Common Name (e.g. server FQDN or YOUR name) []:www.chyingp.com
+Email Address []:416394284@qq.com
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:123456
+An optional company name []:YH
+➜  cert git:(master) ✗ openssl x509 -req -in chyingp-csr.pem -signkey chyingp-key.pem -out chyingp-cert.pem
+```
+
+
+## 私有CA签名的证书
+
+首先，创建自签名的CA证书
+
+```bash
+# 创建ca的私钥
+openssl genrsa -out my-ca.key.pem 2048
+
+# 创建ca的证书
+openssl req \
+  -x509 \
+  -new \
+  -nodes \
+  -key my-ca.key.pem \
+  -days 1024 \
+  -out my-ca.crt.pem \
+  -subj "/C=CN/ST=Guandong/L=Shenzhen/O=YH Inc/CN=chyingp.com"
+```
+
+然后，创建用CA的私钥进行签名的网站证书
+
+```bash
+# 创建私钥
+openssl genrsa \
+  -out my-server.key.pem \
+  2048  
+
+# 创建证书签名请求
+openssl req -new \
+  -key my-server.key.pem \
+  -out my-server.csr.pem \
+  -subj "/C=CN/ST=Guandong/L=Shenzhen/O=YH Inc/CN=www.chyingp.com"
+
+# 创建网站证书
+openssl x509 \
+  -req -in my-server.csr.pem \
+  -CA my-ca.crt.pem \
+  -CAkey my-ca.key.pem \
+  -CAcreateserial \
+  -out my-server.crt.pem \
+  -days 500  
+```
+
 ## 相关链接
 
 Why is my node.js SSL connection failing to connect?
@@ -90,3 +169,9 @@ http://seanlook.com/2015/01/15/openssl-certificate-encryption/
 
 自签名证书和私有CA签名的证书的区别 创建自签名证书 创建私有CA 证书类型 证书扩展名
 http://blog.csdn.net/sdcxyz/article/details/47220129
+
+Painless Self Signed Certificates in node.js
+https://github.com/Daplie/node-ssl-root-cas/wiki/Painless-Self-Signed-Certificates-in-node.js
+
+DER vs. CRT vs. CER vs. PEM Certificates and How To Convert Them
+https://support.ssl.com/Knowledgebase/Article/View/19/0/der-vs-crt-vs-cer-vs-pem-certificates-and-how-to-convert-them

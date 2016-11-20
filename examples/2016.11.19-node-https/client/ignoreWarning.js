@@ -1,13 +1,14 @@
-// 例子：将12306的CA证书，加入我们的信任列表里
+// 例子：忽略安全警告
 var https = require('https');
 var fs = require('fs');
-var ca = fs.readFileSync('./srca.cer.pem');
 
 var options = {	
 	hostname: 'kyfw.12306.cn',
 	path: '/otn/leftTicket/init',
-	ca: [ ca ]
+	rejectUnauthorized: false
 };
+
+// options.agent = new https.Agent(options);
 
 var req = https.get(options, function(res){	
 	res.pipe(process.stdout);	

@@ -78,3 +78,15 @@ TODO
 
 
 ## 相关链接
+
+Why is my node.js SSL connection failing to connect?
+http://www.thedreaming.org/2016/09/27/nodejs-ssl/
+
+利用OpenSSL创建自签名的SSL证书备忘（自建ca）
+http://wangye.org/blog/archives/732/
+
+OpenSSL 与 SSL 数字证书概念贴
+http://seanlook.com/2015/01/15/openssl-certificate-encryption/
+
+自签名证书和私有CA签名的证书的区别 创建自签名证书 创建私有CA 证书类型 证书扩展名
+http://blog.csdn.net/sdcxyz/article/details/47220129

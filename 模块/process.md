@@ -133,7 +133,7 @@ setTimeout(() => {
 
 ## 标准输入/标准输出/标准错误输出：process.stdin、process.stdout
 
-process.stdin、process.stdout分别代表进程的标准输入、标准输出。看官网的例子
+process.stdin、process.stdout、process.stderr 分别代表进程的标准输入、标准输出、标准错误输出。看官网的例子
 
 ```js
 process.stdin.setEncoding('utf8');
@@ -158,6 +158,8 @@ data: hello
 world
 data: world
 ```
+
+process.stderr也差不多，读者可以自己试下。
 
 ## 用户组/用户 相关
 

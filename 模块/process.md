@@ -131,6 +131,34 @@ setTimeout(() => {
 }, 1000);
 ```
 
+## 标准输入/标准输出/标准错误输出：process.stdin、process.stdout
+
+process.stdin、process.stdout分别代表进程的标准输入、标准输出。看官网的例子
+
+```js
+process.stdin.setEncoding('utf8');
+
+process.stdin.on('readable', () => {
+  var chunk = process.stdin.read();
+  if (chunk !== null) {
+    process.stdout.write(`data: ${chunk}`);
+  }
+});
+
+process.stdin.on('end', () => {
+  process.stdout.write('end');
+});
+```
+
+执行程序，可以看到，程序通过 process.stdin 读取用户输入的同时，通过 process.stdout 将内容输出到控制台
+
+```bash
+hello
+data: hello
+world
+data: world
+```
+
 ## 用户组/用户 相关
 
 process.seteuid(id)：

@@ -22,9 +22,27 @@ if(process.env.NODE_ENV === 'production'){
 
 ## 异步：process.nextTick(fn)
 
-使用频率同样很高，通常用在异步的场景，先来个简单的栗子：
+使用频率同样很高，通常用在异步的场景，来个简单的栗子：
 
+```js
+console.log('海贼王');
+process.nextTick(function(){
+    console.log('火影忍者');
+});
+console.log('死神');
 
+// 输出如下
+// 海贼王
+// 死神
+// 火影忍者
+```
+
+process.nextTick(fn) 咋看跟 setTimeout(fn, 0) 很像，但实际有实现及性能上的差异，我们先记住几个点：
+
+* process.nextTick(fn) 将 fn 放到 node 事件循环的 下一个tick 里；
+* process.nextTick(fn) 比 setTimetout(fn, 0) 性能高；
+
+这里不打算深入讨论，感兴趣的可以点击[这里](https://cnodejs.org/topic/4f16442ccae1f4aa2700109b)进行了解。
 
 ## 获取命令行参数：process.argv
 
@@ -75,9 +93,71 @@ Starting directory: /Users/a/Documents/git-code/nodejs-learning-guide/examples/2
 New directory: /private/tmp
 ```
 
+## IPC相关
 
+* process.connected
+* process.channel：
 
+## 其他
 
+process.config：跟node的编译配置参数有关
+
+process.cpuUsage([previousValue])：使用时间耗时
+
+```js
+const startUsage = process.cpuUsage();
+// { user: 38579, system: 6986 }
+
+// spin the CPU for 500 milliseconds
+const now = Date.now();
+while (Date.now() - now < 500);
+
+console.log(process.cpuUsage(startUsage));
+// { user: 514883, system: 11226 }
+```
+
+process.hrtime()：一般用于做性能基准测试。返回一个数组，数组里的值...
+
+```js
+var time = process.hrtime();
+// [ 1800216, 25 ]
+
+setTimeout(() => {
+  var diff = process.hrtime(time);
+  // [ 1, 552 ]
+
+  console.log(`Benchmark took ${diff[0] * 1e9 + diff[1]} nanoseconds`);
+  // benchmark took 1000000527 nanoseconds
+}, 1000);
+```
+
+## 用户组/用户 相关
+
+process.seteuid(id)：
+process.geteuid()：获得当前用户的id。（POSIX平台上才有效）
+
+process.getgid(id)
+process.getgid()：获得当前群组的id。（POSIX平台上才有效，群组、有效群组 的区别，请自行谷歌）
+
+process.setegid(id)
+process.getegid()：获得当前有效群组的id。（POSIX平台上才有效）
+
+process.setroups(groups)：
+process.getgroups()：获得附加群组的id。（POSIX平台上才有效，
+
+process.setgroups(groups)：
+process.setgroups(groups)：
+
+process.initgroups(user, extra_group)：
+
+## TODO
+
+官方文档里，对于 process.nextTick(fn) 有如下描述，如何构造用例进行测试？
+
+>It runs before any additional I/O events (including timers) fire in subsequent ticks of the event loop.
 
 ## 相关链接
 
+[Understanding process.nextTick()](https://howtonode.org/understanding-process-next-tick)
+
+[nodejs 异步之 Timer &Tick; 篇](https://cnodejs.org/topic/4f16442ccae1f4aa2700109b)

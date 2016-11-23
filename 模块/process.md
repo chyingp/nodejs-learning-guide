@@ -95,8 +95,30 @@ New directory: /private/tmp
 
 ## IPC相关
 
-* process.connected：
-* process.channel：
+* process.connected：如果当前进程是子进程，且与父进程之间通过IPC通道连接着，则为true；
+* process.disconnect()：断开与父进程之间的IPC通道，此时会将 process.connected 置为false；
+
+首先是 connected.js，通过 fork 创建子进程（父子进程之间创建了IPC通道）
+
+```js
+var child_process = require('child_process');
+
+child_process.fork('./connectedChild.js', {
+  stdio: 'inherit'
+});
+```
+
+然后，在 connectedChild.js 里面。
+
+```js
+console.log( 'process.connected: ' + process.connected );
+process.disconnect();
+console.log( 'process.connected: ' + process.connected );
+
+// 输出：
+// process.connected: true
+// process.connected: false
+```
 
 ## 其他
 

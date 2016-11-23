@@ -68,6 +68,29 @@ process.argv.forEach(function(val, index, array) {
 参数3: production
 ```
 
+## 获取node specific参数：process.execArgv
+
+跟 process.argv 看着像，但差异很大。它会返回 node specific 的参数（也就是运行node程序特有的参数啦，比如 --harmony）。这部分参数不会出现在 process.argv 里。
+
+我们来看个例子，相当直观。输入命令 `node --harmony execArgv.js --nick chyingp`， execArgv.js 代码如下：
+
+```js
+process.execArgv.forEach(function(val, index, array) {
+  console.log(index + ': ' + val);
+});
+// 输出：
+// 0: --harmony
+
+process.argv.forEach(function(val, index, array) {
+  console.log(index + ': ' + val);
+});
+// 输出：
+// 0: /Users/a/.nvm/versions/node/v6.1.0/bin/node
+// 1: /Users/a/Documents/git-code/nodejs-learning-guide/examples/2016.11.22-node-process/execArgv.js
+// 2: --nick
+// 3: chyingp
+```
+
 ## 当前工作路径：process.cwd() vs process.chdir(directory)
 
 * process.cwd()：返回当前工作路径
@@ -124,34 +147,6 @@ console.log( 'process.connected: ' + process.connected );
 
 process.config：跟node的编译配置参数有关
 
-process.cpuUsage([previousValue])：使用时间耗时
-
-```js
-const startUsage = process.cpuUsage();
-// { user: 38579, system: 6986 }
-
-// spin the CPU for 500 milliseconds
-const now = Date.now();
-while (Date.now() - now < 500);
-
-console.log(process.cpuUsage(startUsage));
-// { user: 514883, system: 11226 }
-```
-
-process.hrtime()：一般用于做性能基准测试。返回一个数组，数组里的值...
-
-```js
-var time = process.hrtime();
-// [ 1800216, 25 ]
-
-setTimeout(() => {
-  var diff = process.hrtime(time);
-  // [ 1, 552 ]
-
-  console.log(`Benchmark took ${diff[0] * 1e9 + diff[1]} nanoseconds`);
-  // benchmark took 1000000527 nanoseconds
-}, 1000);
-```
 
 ## 标准输入/标准输出/标准错误输出：process.stdin、process.stdout
 
@@ -202,14 +197,67 @@ process.setgroups(groups)：
 
 process.initgroups(user, extra_group)：
 
-## 进程信息
+## 当前进程信息
 
-process.title：可以用它来修改进程的名字，当你用`ps`命令，同时有多个node进程在跑的时候，作用就出来了。
-process.pid：返回进程id。
-process.uptime()：当前node进程已经运行了多长时间（单位是秒）。
-process.version：返回当前node的版本，比如'v6.1.0'。
-process.platform：返回关于平台描述的字符串，比如 darwin、win32 等。
-process.versions：返回node的版本，以及依赖库的版本，如下所示。
+* process.pid：返回进程id。
+* process.title：可以用它来修改进程的名字，当你用`ps`命令，同时有多个node进程在跑的时候，作用就出来了。
+
+## 运行情况/资源占用情况
+
+* process.uptime()：当前node进程已经运行了多长时间（单位是秒）。
+* process.memoryUsage()：返回进程占用的内存，单位为字节。输出内容大致如下：
+
+```js
+{ 
+    rss: 19181568, 
+    heapTotal: 8384512, // V8占用的内容
+    heapUsed: 4218408 // V8实际使用了的内存
+}
+```
+
+* process.cpuUsage([previousValue])：CPU使用时间耗时，单位为毫秒。user表示用户程序代码运行占用的时间，system表示系统占用时间。如果当前进程占用多个内核来执行任务，那么数值会比实际感知的要大。官方例子如下：
+
+```js
+const startUsage = process.cpuUsage();
+// { user: 38579, system: 6986 }
+
+// spin the CPU for 500 milliseconds
+const now = Date.now();
+while (Date.now() - now < 500);
+
+console.log(process.cpuUsage(startUsage));
+// { user: 514883, system: 11226 }
+```
+
+* process.hrtime()：一般用于做性能基准测试。返回一个数组，数组里的值为 [[seconds, nanoseconds] （1秒等10的九次方毫微秒）。
+注意，这里返回的值，是相对于过去一个随机的时间，所以本身没什么意义。仅当你将上一次调用返回的值做为参数传入，才有实际意义。
+
+把官网的例子稍做修改：
+
+```js
+var time = process.hrtime();
+
+setInterval(() => {
+  var diff = process.hrtime(time);
+
+  console.log(`Benchmark took ${diff[0] * 1e9 + diff[1]} nanoseconds`);
+}, 1000);
+```
+
+输出大概如下：
+
+```bash
+Benchmark took 1006117293 nanoseconds
+Benchmark took 2049182207 nanoseconds
+Benchmark took 3052562935 nanoseconds
+Benchmark took 4053410161 nanoseconds
+Benchmark took 5056050224 nanoseconds
+```
+
+## node可执行程序相关信息
+
+1. process.version：返回当前node的版本，比如'v6.1.0'。
+2. process.versions：返回node的版本，以及依赖库的版本，如下所示。
 
 ```js
 { http_parser: '2.7.0',
@@ -223,7 +271,7 @@ process.versions：返回node的版本，以及依赖库的版本，如下所示
   openssl: '1.0.2h' }
 ```
 
-process.release：返回当前node发行版本的相关信息，大部分时候不会用到。具体字段含义可以看[这里](https://nodejs.org/api/process.html#process_process_release)。
+3. process.release：返回当前node发行版本的相关信息，大部分时候不会用到。具体字段含义可以看[这里](https://nodejs.org/api/process.html#process_process_release)。
 
 ```js
 {
@@ -235,25 +283,74 @@ process.release：返回当前node发行版本的相关信息，大部分时候�
 }
 ```
 
-process.config：返回当前 node版本 编译时的参数，同样很少会用到，一般用来查问题。
+4. process.config：返回当前 node版本 编译时的参数，同样很少会用到，一般用来查问题。
+5. process.execPath：node可执行程序的绝对路径，比如 '/usr/local/bin/node'
 
-## 进程运行信息
+## 进程运行所在环境
 
-process.memoryUsage()：返回进程占用的内存，单位为字节。输出内容大致如下：
+* process.arch：返回当前系统的处理器架构（字符串），比如'arm', 'ia32', or 'x64'。
+* process.platform：返回关于平台描述的字符串，比如 darwin、win32 等。
+
+## 警告信息:process.emitWarning(warning);
+
+v6.0.0新增的接口，可以用来抛出警告信息。最简单的例子如下，只有警告信息
 
 ```js
-{ 
-    rss: 19181568, 
-    heapTotal: 8384512, // V8占用的内容
-    heapUsed: 4218408 // V8实际使用了的内存
-}
+process.emitWarning('Something happened!');
+// (node:50215) Warning: Something happened!
 ```
 
-## TODO
+可以给警告信息加个名字，便于分类
 
-官方文档里，对于 process.nextTick(fn) 有如下描述，如何构造用例进行测试？
+```js
+process.emitWarning('Something Happened!', 'CustomWarning');
+// (node:50252) CustomWarning: Something Happened!
+```
+
+可以对其进行监听
+
+```js
+process.emitWarning('Something Happened!', 'CustomWarning');
+
+process.on('warning', (warning) => {
+  console.warn(warning.name);
+  console.warn(warning.message);
+  console.warn(warning.stack);
+});
+
+/*
+(node:50314) CustomWarning: Something Happened!
+CustomWarning
+Something Happened!
+CustomWarning: Something Happened!
+    at Object.<anonymous> (/Users/a/Documents/git-code/nodejs-learning-guide/examples/2016.11.22-node-process/emitWarning.js:3:9)
+    at Module._compile (module.js:541:32)
+    at Object.Module._extensions..js (module.js:550:10)
+    at Module.load (module.js:456:32)
+    at tryModuleLoad (module.js:415:12)
+    at Function.Module._load (module.js:407:3)
+    at Function.Module.runMain (module.js:575:10)
+    at startup (node.js:160:18)
+    at node.js:445:3
+*/    
+```
+
+也可以直接给个Error对象
+
+```js
+const myWarning = new Error('Warning! Something happened!');
+myWarning.name = 'CustomWarning';
+
+process.emitWarning(myWarning);
+```
+
+## TODO 待进一步验证
+
+1. 官方文档里，对于 process.nextTick(fn) 有如下描述，如何构造用例进行测试？
 
 >It runs before any additional I/O events (including timers) fire in subsequent ticks of the event loop.
+
+2. process.channel：实际测试结果，即使父、子进程间存在IPC通道，process.channel 的值依旧是undefined.（测试方法有问题？）
 
 ## 相关链接
 

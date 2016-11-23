@@ -95,7 +95,7 @@ New directory: /private/tmp
 
 ## IPC相关
 
-* process.connected
+* process.connected：
 * process.channel：
 
 ## 其他
@@ -179,6 +179,53 @@ process.setgroups(groups)：
 process.setgroups(groups)：
 
 process.initgroups(user, extra_group)：
+
+## 进程信息
+
+process.title：可以用它来修改进程的名字，当你用`ps`命令，同时有多个node进程在跑的时候，作用就出来了。
+process.pid：返回进程id。
+process.uptime()：当前node进程已经运行了多长时间（单位是秒）。
+process.version：返回当前node的版本，比如'v6.1.0'。
+process.platform：返回关于平台描述的字符串，比如 darwin、win32 等。
+process.versions：返回node的版本，以及依赖库的版本，如下所示。
+
+```js
+{ http_parser: '2.7.0',
+  node: '6.1.0',
+  v8: '5.0.71.35',
+  uv: '1.9.0',
+  zlib: '1.2.8',
+  ares: '1.10.1-DEV',
+  icu: '56.1',
+  modules: '48',
+  openssl: '1.0.2h' }
+```
+
+process.release：返回当前node发行版本的相关信息，大部分时候不会用到。具体字段含义可以看[这里](https://nodejs.org/api/process.html#process_process_release)。
+
+```js
+{
+  name: 'node',
+  lts: 'Argon',
+  sourceUrl: 'https://nodejs.org/download/release/v4.4.5/node-v4.4.5.tar.gz',
+  headersUrl: 'https://nodejs.org/download/release/v4.4.5/node-v4.4.5-headers.tar.gz',
+  libUrl: 'https://nodejs.org/download/release/v4.4.5/win-x64/node.lib'
+}
+```
+
+process.config：返回当前 node版本 编译时的参数，同样很少会用到，一般用来查问题。
+
+## 进程运行信息
+
+process.memoryUsage()：返回进程占用的内存，单位为字节。输出内容大致如下：
+
+```js
+{ 
+    rss: 19181568, 
+    heapTotal: 8384512, // V8占用的内容
+    heapUsed: 4218408 // V8实际使用了的内存
+}
+```
 
 ## TODO
 

@@ -16,6 +16,7 @@ Nodejs学习过程中的一些总结，包括：（请 [点击这里查看完整
   * [网络服务-http\(ok\)](模块/http.md)
   * [网络服务-http-req\(ok\)](/模块/http.req.md)
   * [网络服务-http-res\(ok\)](/模块/http.res.md)
+  * [网络服务-http-client\(ok\)](/模块/http.client.md)
   * [网络服务-http-server\(ok\)](/模块/http.server.md)
   * [网络服务-https(ok)](/模块/https.md)
   * [网络TCP-net\(ok\)](/模块/net.md)

@@ -31,7 +31,7 @@ Nodejs学习过程中的一些总结，包括：（请 [点击这里查看完整
   * 基础调试-console
   * 进阶调试-debugger
   * 错误处理-error
-  * 事件机制-events
+  * [事件机制-events(ok)](模块/events.md)
   * 全局对象-global
   * 模块机制-module
   * [本地路径处理-path\(ok\)](模块/path.md)

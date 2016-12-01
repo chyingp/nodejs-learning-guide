@@ -21,7 +21,7 @@
   * [进程相关-process(ok)](模块/process.md)
   * 集群-cluster
   * [基础调试-console(ok)](模块/console.md)
-  * 进阶调试-debugger
+  * [进阶调试-debugger(ok)](模块/debug.md)
   * 错误处理-error
   * [事件机制-events(ok)](模块/events.md)
   * 全局对象-global

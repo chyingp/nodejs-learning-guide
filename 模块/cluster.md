@@ -58,6 +58,8 @@ cluster默认支持两种负载均衡策略，最常见的是第一种轮询。�
 * master进程：不做特殊处理。
 * worker进程：通过`cluster._getServer`来创建server。端口共享的秘密就在这里面了。
 
+假设有workerA、workerB，同时监听端口
+
 ```js
   if (cluster.isMaster || exclusive) {
     self._listen2(address, port, addressType, backlog, fd);

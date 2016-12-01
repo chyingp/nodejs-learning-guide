@@ -344,6 +344,97 @@ myWarning.name = 'CustomWarning';
 process.emitWarning(myWarning);
 ```
 
+## 向进程发送信号：process.kill(pid, signal)
+
+process.kill() 这个方法名可能会让初学者感到困惑，其实它并不是用来杀死进程的，而是用来向进程发送信号。举个例子：
+
+```js
+console.log('hello');
+
+process.kill(process.pid, 'SIGHUP');
+
+console.log('world');
+```
+
+输出如下，可以看到，最后一行代码并没有执行，因为向当前进程发送 SIGHUP 信号，进程退出所致。
+
+```bash
+hello
+[1]    50856 hangup     node kill.js
+```
+
+可以通过监听 SIGHUP 事件，来阻止它的默认行为。
+
+```js
+process.on('SIGHUP', () => {
+  console.log('Got SIGHUP signal.');
+});
+
+console.log('hello');
+
+process.kill(process.pid, 'SIGHUP');
+
+console.log('world');
+```
+
+测试结果比较意外，输出如下：（osx 10.11.4），SIGHUP 事件回调里的内容并没有输出。
+
+```bash
+hello
+world
+```
+
+猜测是因为写标准输出被推到下一个事件循环导致（类似process.exit()小节提到的），再试下
+
+```js
+process.on('SIGHUP', () => {
+  console.log('Got SIGHUP signal.');
+});
+
+setTimeout(function(){
+  console.log('Exiting.');
+}, 0);
+
+console.log('hello');
+
+process.kill(process.pid, 'SIGHUP');
+
+console.log('world');
+```
+
+输出如下（其实并不能说明什么。。。知道真相的朋友请举手。。。）
+
+```bash
+hello
+world
+Exiting.
+Got SIGHUP signal.
+```
+
+## 终止进程：process.exit([exitCode])、process.exitCode
+
+1. process.exit([exitCode]) 可以用来立即退出进程。即使当前有操作没执行完，比如 process.exit() 的代码逻辑，或者未完成的异步逻辑。
+2. 写数据到 process.stdout 之后，立即调用 process.exit() 是不保险的，因为在node里面，往 stdout 写数据是非阻塞的，可以跨越多个事件循环。于是，可能写到一半就跪了。比较保险的做法是，通过process.exitCode设置退出码，然后等进程自动退出。
+3. 如果程序出现异常，必须退出不可，那么，可以抛出一个未被捕获的error，来终止进程，这个比 process.exit() 安全。
+
+来段官网的例子镇楼：
+
+```js
+// How to properly set the exit code while letting
+// the process exit gracefully.
+if (someConditionNotMet()) {
+  printUsageToStdout();
+  process.exitCode = 1;
+}
+```
+
+备注：整个 process.exit() 的接口说明，都在告诉我们 process.exit() 这个接口有多不可靠。。。还用吗。。。
+
+## 事件
+
+* beforeExit：进程退出之前触发，参数为 exitCode。（此时eventLoop已经空了）如果是显式调用 process.exit()退出，或者未捕获的异常导致退出，那么 beforeExit 不会触发。（我要，这事件有何用。。。）
+* exit：
+
 ## TODO 待进一步验证
 
 1. 官方文档里，对于 process.nextTick(fn) 有如下描述，如何构造用例进行测试？

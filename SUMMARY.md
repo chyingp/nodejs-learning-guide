@@ -20,7 +20,7 @@
   * 子进程-child\_process
   * 进程相关-process
   * 集群-cluster
-  * 基础调试-console
+  * [基础调试-console(ok)](/模块/console.md)
   * 进阶调试-debugger
   * 错误处理-error
   * [事件机制-events(ok)](模块/events.md)

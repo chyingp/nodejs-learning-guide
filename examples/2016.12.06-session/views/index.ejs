@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>会话管理</title>
+</head>
+<body>
+
+<h1>会话管理</h1>
+
+<% if(isLogined){ %>
+	<p>当前登录用户：<%= name %>，<a href="/logout" id="logout">退出登陆</a></p>
+<% }else{ %>	
+	<button id="login">登陆</button>
+<% } %>	
+
+<script type="text/javascript" src="/jquery-3.1.0.min.js"></script>
+<script type="text/javascript">
+	$('#login').click(function(data){
+		$.ajax({
+			url: '/login',
+			type: 'POST',
+			data: {
+				name: 'chyingp',
+				password: 123456
+			},
+			success: function(data){
+				if(data.ret_code === 0){
+					location.reload();
+				}	
+			}
+		});
+	});
+</script>
+
+</body>
+</html>

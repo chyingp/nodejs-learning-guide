@@ -1,47 +1,28 @@
+## 文档概览
+
+本文基于express、express-session实现了简易的登录/登出功能，完整的代码示例可以在[这里](https://github.com/chyingp/nodejs-learning-guide/tree/master/examples/2016.12.06-session)找到。
+
 ## 环境初始化
 
 首先，初始化项目
 
 ```bash
-➜  demo express -e
-
-   create : .
-   create : ./package.json
-   create : ./app.js
-   create : ./public
-   create : ./public/javascripts
-   create : ./public/images
-   create : ./routes
-   create : ./routes/index.js
-   create : ./routes/users.js
-   create : ./public/stylesheets
-   create : ./public/stylesheets/style.css
-   create : ./views
-   create : ./views/index.ejs
-   create : ./views/error.ejs
-   create : ./bin
-   create : ./bin/www
-
-   install dependencies:
-     $ cd . && npm install
-
-   run the app:
-     $ DEBUG=demo:* npm start
+express -e
 ```
 
-安装依赖
+然后，安装依赖。
 
 ```bash
 npm install
 ```
 
-安装session相关的包。
+接着，安装session相关的包。
 
 ```bash
 npm install --save express-session session-file-store
 ```
 
-## session配置
+## session相关配置
 
 配置如下，并不复杂，可以见代码注释，或者参考[官方文档](https://github.com/expressjs/session#options)。
 
@@ -67,7 +48,9 @@ app.use(session({
 
 ## 实现登录/登出接口
 
-首先，在本地创建个文件，来保存用户名、密码。
+### 创建测试账户数据
+
+首先，在本地创建个文件，来保存可用于登录的账户信息，避免创建链接数据库的繁琐。
 
 ```js
 // users.js
@@ -78,7 +61,9 @@ module.exports = {
 };
 ```
 
-然后，实现登录、登出接口。其中：
+### 登录、登出接口实现
+
+实现登录、登出接口，其中：
 
 * 登录：如果用户存在，则通过`req.regenerate`创建session，保存到本地，并通过`Set-Cookie`将session id保存到用户侧；
 * 登出：销毁session，并清除cookie；
@@ -132,6 +117,8 @@ app.get('/logout', function(req, res, next){
 });
 ```
 
+### 登录态判断
+
 用户访问 http://127.0.0.1:3000 时，判断用户是否登录，如果是，则调到用户详情界面（简陋无比）；如果没有登录，则跳到登录界面；
 
 ```js
@@ -147,6 +134,8 @@ app.get('/', function(req, res, next){
 });
 
 ```
+
+### UI界面
 
 最后，看下登录、登出UI相关的代码。
 
@@ -195,6 +184,6 @@ app.get('/', function(req, res, next){
 </html>
 ```
 
-## 写在后面
+## 相关链接
 
-本文相关demo可以在[这里]()找到。
+https://github.com/expressjs/session

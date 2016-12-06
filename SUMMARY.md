@@ -41,5 +41,5 @@
   * [基于express+muter的文件上传(ok)](进阶/文件上传-multer.md)
   * [将图片转成datauri嵌入到html(ok)](/进阶/图片地址转成datauri.md)
   * [本地调试远程服务器上的Node代码(ok)](/模块/debug.md)
-
+  * [express+session实现简易身份认证(ok)](进阶/express+session实现简易身份认证.md)
 

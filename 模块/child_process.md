@@ -21,7 +21,6 @@ ls.on('close', (code) => {
 });
 ```
 
-
 ## 几种创建子进程的方式
 
 注意事项：
@@ -668,7 +667,7 @@ process.send({ foo: 'bar' });
 console.log('5');
 ```
 
-运行`node p.js`，打印出来的内容如下，为何？
+运行`node p.js`，打印出来的内容如下
 
 ```powershell
 ➜  ch node p.js       

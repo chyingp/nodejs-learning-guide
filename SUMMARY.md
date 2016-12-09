@@ -29,6 +29,7 @@
   * [本地路径处理-path\(ok\)](模块/path.md)
   * 逐行读取-readline
   * 命令行设计-repl
+  * [实用工具模块-util(ok)](模块/util.md)
   * 流操作-stream
   * 二进制解码-string\_decoder
   * 定时器-timers

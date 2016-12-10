@@ -88,7 +88,31 @@ process.stdout.write('文件读取完成，文件内容是[');
 fileStream.on('end', onEnd).pipe(process.stdout);;
 ```
 
-## Write Stream
+## Writable Stream
+
+同样以写文件为例子，比如想将`hello world`写到`sample.txt`里。
+
+例子一：
+
+```js
+var fs = require('fs');
+var content = 'hello world';
+var filepath = './sample.txt';
+
+fs.writeFile(filepath, content);
+```
+
+例子二：
+
+```js
+var fs = require('fs');
+var content = 'hello world';
+var filepath = './sample.txt';
+
+var writeStram = fs.createWriteStream(filepath);
+writeStram.write(content);
+writeStram.end();
+```
 
 ## Duplex Stream
 

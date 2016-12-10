@@ -1,0 +1,1 @@
+This is the content from sample.txt, which is read using fs.createReadStream.

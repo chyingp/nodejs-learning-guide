@@ -27,7 +27,7 @@
   * 全局对象-global
   * 模块机制-module
   * [本地路径处理-path\(ok\)](模块/path.md)
-  * 逐行读取-readline
+  * [逐行读取-readline(ok)](模块/readline.md)
   * 命令行设计-repl
   * [实用工具模块-util(ok)](模块/util.md)
   * 流操作-stream

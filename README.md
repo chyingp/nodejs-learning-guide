@@ -35,7 +35,7 @@ Nodejs学习过程中的一些总结，包括：（请 [点击这里查看完整
   * 全局对象-global
   * 模块机制-module
   * [本地路径处理-path\(ok\)](模块/path.md)
-  * 逐行读取-readline
+  * [逐行读取-readline(ok)](模块/readline.md)
   * 命令行设计-repl
   * [实用工具模块-util(ok)](模块/util.md)
   * 流操作-stream

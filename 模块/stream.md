@@ -116,7 +116,44 @@ writeStram.end();
 
 ## Duplex Stream
 
+最常见的Duplex stream应该就是`net.Socket`实例了，在前面的文章里有接触过，这里就直接上代码了。
+
+```js
+var net = require('net');
+var opt = {
+    host: '127.0.0.1',
+    port: '3000'
+};
+
+var client = net.connect(opt, function(){
+    console.log('连接上服务端啦');
+    client.write('你好服务端');  // 可写
+});
+
+// 可读
+client.on('data', function(data){
+    console.log('收到来自服务端的数据%s', data);
+    client.end();
+});
+```
+
 ## Transform Stream
+
+Transform stream是Duplex stream的特例，也就是说，Transform stream也同时可读可写。
+
+常见的Transform stream包括`zlib`、`crypto`，这里举个简单例子：文件的gzip压缩。
+
+```js
+var fs = require('fs');
+var zlib = require('zlib');
+
+var gzip = zlib.createGzip();
+
+var inFile = fs.createReadStream('./extra/fileForCompress.txt');
+var out = fs.createWriteStream('./extra/fileForCompress.txt.gz');
+
+inFile.pipe(gzip).pipe(out);
+```
 
 ## 自定义Stream
 

@@ -212,6 +212,10 @@ version: (1.0.0) 0.0.1
 author: (none) chyingp
 ```
 
+## 写在后面
+
+有不少基于readline的有趣的工具，比如grunt的脚手架工具。限于篇幅不展开，感兴趣的同学可以研究下。
+
 ## 相关链接
 
 https://nodejs.org/api/readline.html

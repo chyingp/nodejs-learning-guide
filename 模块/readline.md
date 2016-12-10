@@ -32,13 +32,46 @@ Please input a word: hello
 You have entered {HELLO}
 ```
 
-## 基础例子
+## 例子：文件逐行读取：日志分析
 
-## 命令行工具：npmt init
+比如我们有如下日志文件access.log，我们想要提取“访问时间+访问地址”，借助`readline`可以很方便的完成日志分析的工作。
 
-## 自动完成：代码提示
+```
+[2016-12-09 13:56:48.407] [INFO] access - ::ffff:127.0.0.1 - - "GET /oc/v/account/user.html HTTP/1.1" 200 213125 "http://www.example.com/oc/v/account/login.html" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36"
+[2016-12-09 14:00:10.618] [INFO] access - ::ffff:127.0.0.1 - - "GET /oc/v/contract/underlying.html HTTP/1.1" 200 216376 "http://www.example.com/oc/v/account/user.html" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36"
+[2016-12-09 14:00:34.200] [INFO] access - ::ffff:127.0.0.1 - - "GET /oc/v/contract/underlying.html HTTP/1.1" 200 216376 "http://www.example.com/oc/v/account/user.html" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.98 Safari/537.36"
+```
 
-## 文件逐行读取：日志分析
+代码如下：
+
+```js
+const readline = require('readline');
+const fs = require('fs');
+
+const rl = readline.createInterface({
+    input: fs.createReadStream('./access.log')
+});
+
+rl.on('line', (line) => {
+    const arr = line.split(' '); 
+    console.log('访问时间：%s %s，访问地址：%s', arr[0], arr[1], arr[13]);
+});
+```
+
+运行结果如下：
+
+```bash
+➜  lineByLineFromFile git:(master) ✗ node app.js
+访问时间：[2016-12-09 13:56:48.407]，访问地址："http://www.example.com/oc/v/account/login.html"
+访问时间：[2016-12-09 14:00:10.618]，访问地址："http://www.example.com/oc/v/account/user.html"
+访问时间：[2016-12-09 14:00:34.200]，访问地址："http://www.example.com/oc/v/account/user.html"
+```
+
+## 例子：命令行工具：npmt init
+
+## 例子：自动完成：代码提示
+
+
 
 ## 相关链接
 

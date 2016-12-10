@@ -64,12 +64,28 @@ readStream.on('end', function(chunk){
 
 例子三：
 
-注意：这里的输出跟前面两个例子有细微的差异。
+这里使用了`.pipe(dest)`，好处在于，如果文件
 
 ```js
 var fs = require('fs');
 
 fs.createReadStream('./sample.txt').pipe(process.stdout);
+```
+
+注意：这里只是原封不动的将内容输出到控制台，所以实际上跟前两个例子有细微差异。可以稍做修改，达到上面同样的效果
+
+```js
+var fs = require('fs');
+
+var onEnd = function(){
+    process.stdout.write(']');  
+};
+
+var fileStream = fs.createReadStream('./sample.txt');
+
+process.stdout.write('文件读取完成，文件内容是[');
+
+fileStream.on('end', onEnd).pipe(process.stdout);;
 ```
 
 ## Write Stream

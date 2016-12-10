@@ -123,6 +123,94 @@ init     install
 
 ## 例子：命令行工具：npmt init
 
+下面借助readline实现一个迷你版的`npm init`功能，运行脚本时，会依次要求用户输入name、version、author属性（其他略过）。
+
+这里用到的是`rl.question(msg, cbk)`这个方法，它会在控制台输入一行提示，当用户完成输入，敲击回车，`cbk`就会被调用，并把用户输入作为参数传入。
+
+```js
+const readline = require('readline');
+const fs = require('fs');
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: 'OHAI> '
+});
+
+const preHint = `
+This utility will walk you through creating a package.json file.
+It only covers the most common items, and tries to guess sensible defaults.
+
+See \`npm help json\` for definitive documentation on these fields
+and exactly what they do.
+
+Use \`npm install <pkg> --save\` afterwards to install a package and
+save it as a dependency in the package.json file.
+
+Press ^C at any time to quit.
+`;
+
+console.log(preHint);
+
+// 问题
+let questions = [ 'name', 'version', 'author'];
+
+// 默认答案
+let defaultAnswers = [ 'name', '1.0.0', 'none' ];
+
+// 用户答案
+let answers = [];
+let index = 0;
+
+function createPackageJson(){
+    var map = {};
+    questions.forEach(function(question, index){
+        map[question] = answers[index];
+    });
+
+    fs.writeFileSync('./package.json', JSON.stringify(map, null, 4));
+}
+
+function runQuestionLoop() {
+
+    if(index === questions.length) {
+        createPackageJson();
+        rl.close();
+        return;
+    }
+    
+    let defaultAnswer = defaultAnswers[index];
+    let question = questions[index] + ': (' + defaultAnswer +') ';
+    
+    rl.question(question, function(answer){
+        answers.push(answer || defaultAnswer);
+        index++;
+        runQuestionLoop();
+    });
+}
+
+runQuestionLoop();
+```
+
+运行效果如下，最后还像模像样的生成了package.json（害羞脸）。
+
+```bash
+➜  commandLine git:(master) ✗ node app.js
+
+This utility will walk you through creating a package.json file.
+It only covers the most common items, and tries to guess sensible defaults.
+
+See `npm help json` for definitive documentation on these fields
+and exactly what they do.
+
+Use `npm install <pkg> --save` afterwards to install a package and
+save it as a dependency in the package.json file.
+
+Press ^C at any time to quit.
+
+name: (name) hello
+version: (1.0.0) 0.0.1
+author: (none) chyingp
+```
 
 ## 相关链接
 

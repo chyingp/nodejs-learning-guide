@@ -10,10 +10,10 @@ const preHint = `
 This utility will walk you through creating a package.json file.
 It only covers the most common items, and tries to guess sensible defaults.
 
-See `npm help json` for definitive documentation on these fields
+See \`npm help json\` for definitive documentation on these fields
 and exactly what they do.
 
-Use `npm install <pkg> --save` afterwards to install a package and
+Use \`npm install <pkg> --save\` afterwards to install a package and
 save it as a dependency in the package.json file.
 
 Press ^C at any time to quit.
@@ -47,12 +47,9 @@ function runQuestionLoop() {
         rl.close();
         return;
     }
-
-    var question;
-    var defaultAnswer;
     
-    defaultAnswer = defaultAnswers.shift();
-    question = questions.shift() + '(' + defaultAnswer +')';
+    let defaultAnswer = defaultAnswers[index];
+    let question = questions[index] + ': (' + defaultAnswer +') ';
     
     rl.question(question, function(answer){
         answers.push(answer || defaultAnswer);
@@ -61,17 +58,4 @@ function runQuestionLoop() {
     });
 }
 
-rl.on('line', (line) => {
-  switch(line.trim()) {
-    case 'hello':
-      console.log('world!');
-      break;
-    default:
-      console.log(`Say what? I might have heard '${line.trim()}'`);
-      break;
-  }
-  rl.prompt();
-}).on('close', () => {
-  console.log('Have a great day!');
-  process.exit(0);
-});
+runQuestionLoop();

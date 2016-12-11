@@ -236,3 +236,59 @@ app.listen(3000);
 
 ## 深入剖析
 
+morgan的代码非常简洁，从设计上来说，morgan的生命周期包含：
+
+>token定义 --> 日志格式定义 -> 日志格式预编译 --> 请求达到/返回 --> 写日志
+
+其中，token定义、日志格式定义前面已经讲到，这里就只讲下 **日志格式预编译** 的细节。
+
+跟模板引擎预编译一样，日志格式预编译，也是为了提升性能。源码如下，最关键的代码就是`compile(fmt)`。
+
+```js
+function getFormatFunction (name) {
+  // lookup format
+  var fmt = morgan[name] || name || morgan.default
+
+  // return compiled format
+  return typeof fmt !== 'function'
+    ? compile(fmt)
+    : fmt
+}
+```
+
+`compile()`方法的实现细节这里不赘述，着重看下`compile(fmt)`返回的内容：
+
+```js
+var morgan = require('morgan');
+var format = morgan['tiny'];
+var fn = morgan.compile(format);
+
+console.log(fn.toString());
+```
+
+运行上面程序，输出内容如下，其中`tokens`其实就是`morgan`。
+
+```bash
+function anonymous(tokens, req, res
+/**/) {
+  return ""
+    + (tokens["method"](req, res, undefined) || "-") + " "
+    + (tokens["url"](req, res, undefined) || "-") + " "
+    + (tokens["status"](req, res, undefined) || "-") + " "
+    + (tokens["res"](req, res, "content-length") || "-") + " - "
+    + (tokens["response-time"](req, res, undefined) || "-") + " ms";
+}
+```
+
+看下`morgan.token()`的定义，就很清晰了
+
+```js
+function token (name, fn) {
+  morgan[name] = fn
+  return this
+}
+```
+
+## 相关链接
+
+https://github.com/expressjs/morgan

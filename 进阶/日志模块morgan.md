@@ -74,3 +74,45 @@ morgan(format, options)
 
 ### 自定义日志格式
 
+首先搞清楚morgan中的两个概念：format 跟 token。非常简单：
+
+* format：日志格式，本质是代表日志格式的字符串，比如 `:method :url :status :res[content-length] - :response-time ms`。
+* token：format的组成部分，比如上面的`:method`、`:url`即使所谓的token。
+
+搞清楚format、token的区别后，就可以看下morgan中，关于自定义日志格式的关键API。
+
+```js
+morgan.format(name, format);  // 自定义日志格式
+morgan.token(name, fn);  // 自定义token
+```
+
+## 自定义format
+
+非常简单，首先通过`morgan.format()`定义名为`joke`的日志格式，然后通过`morgan('joke')`调用即可。
+
+```js
+var express = require('express');
+var app = express();
+var morgan = require('morgan');
+
+morgan.format('joke', '[joke] :method :url :status');
+
+app.use(morgan('joke'));
+
+app.use(function(req, res, next){
+    res.send('ok');
+});
+
+app.listen(3000);
+```
+
+我们来看下运行结果
+
+```bash
+➜  2016.12.11-advanced-morgan git:(master) ✗ node morgan.format.js
+[joke] GET / 304
+[joke] GET /favicon.ico 200
+```
+
+## 自定义token
+

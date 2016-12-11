@@ -116,3 +116,37 @@ app.listen(3000);
 
 ## 自定义token
 
+代码如下，通过`morgan.token()`自定义token，然后将自定义的token，加入自定义的format中即可。
+
+```js
+var express = require('express');
+var app = express();
+var morgan = require('morgan');
+
+// 自定义token
+morgan.token('from', function(req, res){
+    return req.query.from || '-';
+});
+
+// 自定义format，其中包含自定义的token
+morgan.format('joke', '[joke] :method :url :status :from');
+
+// 使用自定义的format
+app.use(morgan('joke'));
+
+app.use(function(req, res, next){
+    res.send('ok');
+});
+
+app.listen(3000);
+```
+
+运行程序，并在浏览器里先后访问 http://127.0.0.1:3000/hello?from=app 和 http://127.0.0.1:3000/hello?from=pc
+
+```bash
+➜  2016.12.11-advanced-morgan git:(master) ✗ node morgan.token.js 
+[joke] GET /hello?from=app 200 app
+[joke] GET /favicon.ico 304 -
+[joke] GET /hello?from=pc 200 pc
+[joke] GET /favicon.ico 304 -
+```

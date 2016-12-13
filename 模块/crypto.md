@@ -98,9 +98,71 @@ input.pipe(hmac).pipe(process.stdout)
 // 734cc62f32841568f45715aeb9f4d7891324e6d948e4c6c60c0621cdac48623a
 ```
 
-## 加密
+## 加密/解密
 
+加解密主要用到下面两组方法：
 
+加密：
+
+* crypto.createCipher(algorithm, password)
+* crypto.createCipheriv(algorithm, key, iv)
+
+解密：
+
+* crypto.createDecipher(algorithm, password)
+* crypto.createDecipheriv(algorithm, key, iv)
+
+### crypto.createCipher(algorithm, password)
+
+先来看下 crypto.createCipher(algorithm, password)，两个参数分别是加密算法、密码
+
+* algorithm：加密算法，比如`aes192`，具体有哪些可选的算法，依赖于本地`openssl`的版本，可以通过`openssl list-cipher-algorithms`命令查看支持哪些算法。
+* password：用来生成密钥(key)、初始化向量(IV)。
+
+备注：这里nodejs屏蔽了AES的使用/实现细节，关于key、IV，感兴趣的同学可以自行谷歌下。
+
+```js
+var crypto = require('crypto');
+var secret = 'secret';
+
+var cipher = crypto.createCipher('aes192', secret);
+var content = 'hello';
+var cryptedContent;
+
+cipher.update(content);
+cryptedContent = cipher.final('hex');
+console.log(cryptedContent);
+// 输出：
+// 71d30ec9bc926b5dbbd5150bf9d3e5fb
+```
+
+### crypto.createDecipher(algorithm, password)
+
+可以看作 crypto.createCipher(algorithm, password) 逆向操作，直接看例子
+
+```js
+var crypto = require('crypto');
+var secret = 'secret';
+
+var cipher = crypto.createCipher('aes192', secret);
+var content = 'hello';
+var cryptedContent;
+
+cipher.update(content);
+cryptedContent = cipher.final('hex');
+console.log(cryptedContent);
+// 输出：
+// 71d30ec9bc926b5dbbd5150bf9d3e5fb
+
+var decipher = crypto.createDecipher('aes192', secret);
+var decryptedContent;
+
+decipher.update(cryptedContent, 'hex');
+decryptedContent = decipher.final('utf8');
+console.log(decryptedContent);
+// 输出：
+// hello
+```
 
 ## 关键点
 
@@ -131,6 +193,12 @@ SHA：Secure Hash Algorithm，安全散列算法。
 HMAC：Hash-based Message Authentication Code，密钥相关的哈希运算消息认证码。
 
 SPKAC：
+
+对称加密：比如AES、DES
+
+非对称加密：比如RSA、DSA
+
+AES：Advanced Encryption Standard（高级加密标准），密钥长度可以是128、192和256位。
 
 ## 相关链接
 

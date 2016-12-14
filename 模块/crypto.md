@@ -166,7 +166,39 @@ console.log(decryptedContent);
 
 ### crypto.createCipheriv(algorithm, key, iv)
 
-TODO
+相对于 crypto.createCipher() 来说，crypto.createCipheriv() 需要提供`key`和`iv`，而 crypto.createCipher() 是根据用户提供的 password 算出来的。
+
+key、iv 可以是Buffer，也可以是utf8编码的字符串，这里需要关注的是它们的长度：
+
+* key：根据选择的算法有关，比如 aes128、aes192、aes256，长度分别是128、192、256位（16、24、32字节）
+* iv：都是128位（16字节）
+
+```js
+var crypto = require('crypto');
+var key = crypto.randomBytes(192/8);
+var iv = crypto.randomBytes(128/8);
+var algorithm = 'aes192';
+
+function encrypt(text){
+    var cipher = crypto.createCipheriv(algorithm, key, iv);
+    cipher.update(text);
+    return cipher.final('hex');
+}
+
+function decrypt(encrypted){
+    var decipher = crypto.createDecipheriv(algorithm, key, iv);
+    decipher.update(encrypted, 'hex');
+    return decipher.final('utf8');
+}
+
+var content = 'hello';
+var crypted = encrypt('hello');
+console.log( crypted );
+
+var decrypted = decrypt( crypted );
+console.log( decrypted );  // 输出：utf8
+
+```
 
 ## 数字签名
 
@@ -191,8 +223,6 @@ SHA-256/SHA-384/SHA-512：后面表示摘要的长度。
 md5(1991) -> SHA1
 
 sha家族：由美国国家安全局（NSA）所设计，并由美国国家标准与技术研究院（NIST）发布；是美国的政府标准。
-
-
 
 ## 相关术语
 

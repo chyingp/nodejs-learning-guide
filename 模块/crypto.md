@@ -164,6 +164,16 @@ console.log(decryptedContent);
 // hello
 ```
 
+### crypto.createCipheriv(algorithm, key, iv)
+
+TODO
+
+## 数字签名
+
+数字签名的产生包含两个步骤：计算出信息的摘要 以及 用私钥对摘要进行加密。
+
+
+
 ## 关键点
 
 md5：固定长度（128bit）、不可逆（重要）、不同数据的散列值可能相同（重要）、高度离散型（原文细微的变化，会导致散列值差异巨大）
@@ -200,6 +210,8 @@ SPKAC：
 
 AES：Advanced Encryption Standard（高级加密标准），密钥长度可以是128、192和256位。
 
+DES：Data Encryption Standard，数据加密标准，对称密钥加密算法（现在认为不安全）。https://en.wikipedia.org/wiki/Data_Encryption_Standard
+
 ## 相关链接
 
 字符编码笔记：ASCII，Unicode和UTF-8 - 阮一峰的网络日志
@@ -222,3 +234,9 @@ http://blog.jobbole.com/61872/
 
 HMAC-MD5算法原理及实现
 http://www.jianshu.com/p/067f9eb6b252
+
+Encrypting using AES-256, can I use 256 bits IV?
+http://security.stackexchange.com/questions/90848/encrypting-using-aes-256-can-i-use-256-bits-iv
+
+分组对称加密模式:ECB/CBC/CFB/OFB
+http://blog.csdn.net/aaaaatiger/article/details/2525561

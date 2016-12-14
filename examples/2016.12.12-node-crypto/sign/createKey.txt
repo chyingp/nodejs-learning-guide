@@ -1,0 +1,2 @@
+命令如下：
+openssl genrsa -out chyingp-key.pem 2048

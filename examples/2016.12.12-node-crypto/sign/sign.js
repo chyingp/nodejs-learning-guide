@@ -1,26 +1,31 @@
 var crypto = require('crypto');
 var fs = require('fs');
-var privateKey = fs.readFileSync('./chyingp-key.pem');  // 私钥
+var privateKey = fs.readFileSync('./private-key.pem');  // 私钥
+var publicKey = fs.readFileSync('./public-key.pem');  // 公钥
 var algorithm = 'RSA-SHA256';  // 加密算法 vs 摘要算法
 
+// 数字签名
 function sign(text){
 	var sign = crypto.createSign(algorithm);
 	sign.update(text);
 	return sign.sign(privateKey, 'hex');	
 }
 
-function verify(signed){
+// 校验签名
+function verify(oriContent, signature){
 	var verifier = crypto.createVerify(algorithm);
-	verifier.update(text, 'hex');
-	return verifier.verify(privateKey, 'hex');
+	verifier.update(oriContent);
+	return verifier.verify(publicKey, signature, 'hex');
 }
 
+// 对内容进行签名
 var content = 'hello world';
+var signature = sign(content);
+console.log(signature);
 
-var signed = sign(content);
-console.log(signed);
-
-var verified = verify(signed);
+// 校验签名，如果通过，返回true
+var verified = verify(content, signature);
+console.log(verified);
 
 
 

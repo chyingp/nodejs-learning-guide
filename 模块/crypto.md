@@ -257,7 +257,59 @@ console.log(verified);
 
 DiffieHellman：Diffie–Hellman key exchange，缩写为D-H，是一种安全协议，让通信双方在预先没有对方信息的情况下，通过不安全通信信道，创建一个密钥。这个密钥可以在后续的通信中，作为对称加密的密钥加密传递的信息。
 
+代码如下，原理待补充 TODO
 
+```js
+const crypto = require('crypto');
+const assert = require('assert');
+
+// Generate Alice's keys...
+const alice = crypto.createDiffieHellman(2048);
+const alice_key = alice.generateKeys();
+
+// Generate Bob's keys...
+const bob = crypto.createDiffieHellman(alice.getPrime(), alice.getGenerator());
+const bob_key = bob.generateKeys();
+
+// Exchange and generate the secret...
+const alice_secret = alice.computeSecret(bob_key);
+const bob_secret = bob.computeSecret(alice_key);
+
+// OK
+assert.equal(alice_secret.toString('hex'), bob_secret.toString('hex'));
+```
+
+## ECDH：Elliptic Curve Diffie-Hellman 
+
+代码如下，原理待补充 TODO
+
+```js
+const crypto = require('crypto');
+const assert = require('assert');
+
+// Generate Alice's keys...
+const alice = crypto.createECDH('secp521r1');
+const alice_key = alice.generateKeys();
+
+// Generate Bob's keys...
+const bob = crypto.createECDH('secp521r1');
+const bob_key = bob.generateKeys();
+
+// Exchange and generate the secret...
+const alice_secret = alice.computeSecret(bob_key);
+const bob_secret = bob.computeSecret(alice_key);
+
+assert(alice_secret, bob_secret);
+  // OK
+```
+
+## 证书
+
+SPKAC：
+
+>SPKAC is an acronym that stands for Signed Public Key and Challenge, also known as Netscape SPKI.
+
+SPKI：Simple public-key infrastructure
 
 ## 关键点
 
@@ -277,6 +329,8 @@ md5(1991) -> SHA1
 sha家族：由美国国家安全局（NSA）所设计，并由美国国家标准与技术研究院（NIST）发布；是美国的政府标准。
 
 ## 相关术语
+
+SPKAC：Signed Public Key and Challenge
 
 MD5：Message-Digest Algorithm 5，信息-摘要算法。
 
@@ -333,3 +387,9 @@ https://zh.wikipedia.org/wiki/%E8%BF%AA%E8%8F%B2-%E8%B5%AB%E7%88%BE%E6%9B%BC%E5%
 
 理解 Deffie-Hellman 密钥交换算法
 http://wsfdl.com/algorithm/2016/02/04/%E7%90%86%E8%A7%A3Diffie-Hellman%E5%AF%86%E9%92%A5%E4%BA%A4%E6%8D%A2%E7%AE%97%E6%B3%95.html
+
+What is the difference between DHE and ECDH?
+http://stackoverflow.com/questions/2701294/how-does-the-elliptic-curve-version-of-diffie-hellman-cryptography-work?rq=1
+
+Example application for working with SPKAC (signed public key & challege) data coming from the <keygen> element.
+https://github.com/jas-/node-spkac

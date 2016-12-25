@@ -1,4 +1,4 @@
-// 参考：http://www.hacksparrow.com/node-js-udp-server-and-client-example.html
+// 例子：UDP服务端
 var PORT = 33333;
 var HOST = '127.0.0.1';
 

@@ -1,8 +1,8 @@
 ## 模块概览
 
-TODO
+dgram模块是对UDP socket的一层封装，相对net模块简单很多，下面看例子。
 
-## 基础示例
+## UPD客户端 vs UDP服务端
 
 首先，启动UDP server，监听来自端口33333的请求。
 
@@ -72,7 +72,45 @@ UDP Server listening on 127.0.0.1:33333
 
 ## 广播
 
+通过dgram实现广播功能很简单，服务端代码如下。
 
+```js
+var dgram = require('dgram');
+var server = dgram.createSocket('udp4');
+var port = 33333;
+
+server.on('message', function(message, rinfo){
+    console.log('server got message from: ' + rinfo.address + ':' + rinfo.port);
+});
+
+server.bind(port);
+```
+
+接着创建客户端，向地址'255.255.255.255:33333'进行广播。
+
+```js
+var dgram = require('dgram');
+var client = dgram.createSocket('udp4');
+var msg = Buffer.from('hello world');
+var port = 33333;
+var host = '255.255.255.255';
+
+client.bind(function(){
+    client.setBroadcast(true);
+    client.send(msg, port, host, function(err){
+        if(err) throw err;
+        console.log('msg has been sent');
+        client.close();
+    });
+});
+```
+
+运行程序，最终服务端打印日志如下
+
+```bash
+➜  2016.12.22-dgram git:(master) ✗ node broadcast-server.js
+server got message from: 192.168.0.102:61010
+```
 
 ## 相关链接
 

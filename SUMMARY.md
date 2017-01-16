@@ -44,6 +44,7 @@
   * [本地调试远程服务器上的Node代码(ok)](/模块/debug.md)
   * [express+session实现简易身份认证(ok)](进阶/express+session实现简易身份认证.md)
   * [express+morgan：从入门使用到源码剖析(ok)](进阶/日志模块morgan.md)
+  * [调试日志打印：debug模块](/进阶/debug-log.md)
   * express进阶：多模板引擎支持
   * 基于 express + XHR 的跨域资源请求
 

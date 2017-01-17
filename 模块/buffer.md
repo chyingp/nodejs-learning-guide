@@ -167,9 +167,85 @@ console.log(buf5.equals(buf6));
 * `1`：buf大于target，也就是说buf应该排在target之后。
 * `-1`：buf小于target，也就是说buf应该排在target之前。
 
-看例子：
+看例子，官方的例子挺好的，直接贴一下：
+
+```js
+const buf1 = Buffer.from('ABC');
+const buf2 = Buffer.from('BCD');
+const buf3 = Buffer.from('ABCD');
+
+// Prints: 0
+console.log(buf1.compare(buf1));
+
+// Prints: -1
+console.log(buf1.compare(buf2));
+
+// Prints: -1
+console.log(buf1.compare(buf3));
+
+// Prints: 1
+console.log(buf2.compare(buf1));
+
+// Prints: 1
+console.log(buf2.compare(buf3));
+
+// Prints: [ <Buffer 41 42 43>, <Buffer 41 42 43 44>, <Buffer 42 43 44> ]
+// (This result is equal to: [buf1, buf3, buf2])
+console.log([buf1, buf2, buf3].sort(Buffer.compare));
+```
+
+### Buffer.compare(buf1, buf2)
+
+跟 `buf.compare(target)` 大同小异，一般用于排序。直接贴官方例子：
+
+```js
+const buf1 = Buffer.from('1234');
+const buf2 = Buffer.from('0123');
+const arr = [buf1, buf2];
+
+// Prints: [ <Buffer 30 31 32 33>, <Buffer 31 32 33 34> ]
+// (This result is equal to: [buf2, buf1])
+console.log(arr.sort(Buffer.compare));
+```
+
+## 从Buffer.from([62])谈起
 
 
+```js
+var buff = Buffer.from([62])
+// <Buffer 3e>
+// buff[0] === parseInt('3e', 16) === 62
+```
+
+```js
+var buff = Buffer.from([062])
+// <Buffer 32>
+// buff[0] === parseInt(62, 8) === parseInt(32, 16) === 50
+```
+
+```js
+var buff = Buffer.from([0x62])
+// <Buffer 62>
+// buff[0] === parseInt(62, 16) === 98
+```
+
+```js
+var buff = Buffer.from(['62'])
+// <Buffer 3e>
+// buff[0] === parseInt('3e', 16) === 62
+```
+
+```js
+var buff = Buffer.from(['062'])
+// <Buffer 3e>
+// buff[0] === parseInt('3e', 16) === 62
+```
+
+```js
+var buff = Buffer.from(['062'])
+// <Buffer 62>
+// buff[0] === parseInt('62', 16) === 98
+```
 
 ## 拷贝
 

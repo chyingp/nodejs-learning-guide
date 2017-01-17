@@ -325,6 +325,34 @@ console.log(buff7);  // <Buffer 01 02 03>
 
 ## 拷贝：buf.copy(target[, targetStart[, sourceStart[, sourceEnd]]])
 
+使用比较简单，如果忽略后面三个参数，那就是将buf的数据拷贝到target里去，如下所示：
+
+```js
+var buff1 = Buffer.from([1, 2]);
+var buff2 = Buffer.alloc(2);
+
+buff1.copy(buff2);
+
+console.log(buff2);  // <Buffer 01 02>
+```
+
+另外三个参数比较直观，直接看官方例子
+
+```js
+const buf1 = Buffer.allocUnsafe(26);
+const buf2 = Buffer.allocUnsafe(26).fill('!');
+
+for (let i = 0 ; i < 26 ; i++) {
+  // 97 is the decimal ASCII value for 'a'
+  buf1[i] = i + 97;
+}
+
+buf1.copy(buf2, 8, 16, 20);
+
+// Prints: !!!!!!!!qrst!!!!!!!!!!!!!
+console.log(buf2.toString('ascii', 0, 25));
+```
+
 ## 查找：buf.indexOf(value)、buf.lastIndexOf(value)
 
 

@@ -128,6 +128,49 @@ Float32Array();
 Float64Array();
 ```
 
+## buffer比较
+
+### buf.equals(otherBuffer)
+
+判断两个buffer实例存储的数据是否相同，如果是，返回true，否则返回false。
+
+```js
+// 例子一：编码一样，内容相同
+var buf1 = Buffer.from('A');
+var buf2 = Buffer.from('A');
+
+console.log( buf1.equals(buf2) );  // true
+
+// 例子二：编码一样，内容不同
+var buf3 = Buffer.from('A');
+var buf4 = Buffer.from('B');
+
+console.log( buf3.equals(buf4) );  // false
+
+// 例子三：编码不一样，内容相同
+var buf5 = Buffer.from('ABC');  // <Buffer 41 42 43>
+var buf6 = Buffer.from('414243', 'hex');
+
+console.log(buf5.equals(buf6));
+```
+
+### buf.compare(target[, targetStart[, targetEnd[, sourceStart[, sourceEnd]]]])
+
+同样是对两个buffer实例进行比较，不同的是：
+
+1. 可以指定特定比较的范围（通过start、end指定）
+2. 返回值为整数，达标buf、target的大小关系
+
+假设返回值为
+
+* `0`：buf、target大小相同。
+* `1`：buf大于target，也就是说buf应该排在target之后。
+* `-1`：buf小于target，也就是说buf应该排在target之前。
+
+看例子：
+
+
+
 ## 拷贝
 
 >Passing a string, array, or Buffer as the first argument copies the passed object's data into the Buffer.

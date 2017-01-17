@@ -210,6 +210,13 @@ console.log(arr.sort(Buffer.compare));
 
 ## 从Buffer.from([62])谈起
 
+这里稍微研究下Buffer.from(array)。下面是官方文档对API的说明，也就是说，每个array的元素对应1个字节（8位），取值从0到255。
+
+>Allocates a new Buffer using an array of octets.
+
+### 数组元素为数字
+
+首先看下，传入的元素为数字的场景。下面分别是10进制、8进制、16进制，跟预期中的结果一致。
 
 ```js
 var buff = Buffer.from([62])
@@ -229,23 +236,98 @@ var buff = Buffer.from([0x62])
 // buff[0] === parseInt(62, 16) === 98
 ```
 
+### 数组元素为字符串
+
+再看下，传入的元素为字符串的场景。
+
+1. `0`开头的字符串，在parseInt('062')时，可以解释为62，也可以解释为50（八进制），这里看到采用了第一种解释。
+2. 字符串的场景，跟parseInt()有没有关系，暂未深入探究，只是这样猜想。TODO（找时间研究下）
+
 ```js
 var buff = Buffer.from(['62'])
 // <Buffer 3e>
-// buff[0] === parseInt('3e', 16) === 62
+// buff[0] === parseInt('3e', 16) === parseInt('62') === 62
 ```
 
 ```js
 var buff = Buffer.from(['062'])
 // <Buffer 3e>
-// buff[0] === parseInt('3e', 16) === 62
+// buff[0] === parseInt('3e', 16) === parseInt('062') === 62
 ```
 
 ```js
-var buff = Buffer.from(['062'])
+var buff = Buffer.from(['0x62'])
 // <Buffer 62>
-// buff[0] === parseInt('62', 16) === 98
+// buff[0] === parseInt('62', 16) === parseInt('0x62') === 98
 ```
+
+### 数组元素大小超出1个字节
+
+感兴趣的同学自行探究。
+
+```js
+var buff = Buffer.from([256])
+// <Buffer 00>
+```
+
+## Buffer.from('1')
+
+一开始不自觉的会将`Buffer.from('1')[0]`跟`"1"`划等号，其实`"1"`对应的编码是49。
+
+```js
+var buff = Buffer.from('1')  // <Buffer 31>
+console.log(buff[0] === 1)  // false
+```
+
+这样对比就知道了，编码为1的是个控制字符，表示 Start of Heading。
+
+```js
+console.log( String.fromCharCode(49) )  // '1'
+console.log( String.fromCharCode(1) )  // '\u0001'
+```
+
+## buffer连接：Buffer.concat(list[, totalLength])
+
+备注：个人觉得`totalLength`这个参数挺多余的，从官方文档来看，是处于性能提升的角度考虑。不过内部实现也只是遍历list，将length累加得到totalLength，从这点来看，性能优化是几乎可以忽略不计的。
+
+```js
+var buff1 = Buffer.alloc(10);
+var buff2 = Buffer.alloc(20);
+
+var totalLength = buff1.length + buff2.length;
+
+console.log(totalLength);  // 30
+
+var buff3 = Buffer.concat([buff1, buff2], totalLength);
+
+console.log(buff3.length);  // 30
+```
+
+除了上面提到的性能优化，totalLength还有两点需要注意。假设list里面所有buffer的长度累加和为length
+
+* totalLength > length：返回长度为totalLength的Buffer实例，超出长度的部分填充0。
+* totalLength < length：返回长度为totalLength的Buffer实例，后面部分舍弃。
+
+```js
+var buff4 = Buffer.from([1, 2]);
+var buff5 = Buffer.from([3, 4]);
+
+var buff6 = Buffer.concat([buff4, buff5], 5);
+
+console.log(buff6.length);  // 
+console.log(buff6);  // <Buffer 01 02 03 04 00>
+
+var buff7 = Buffer.concat([buff4, buff5], 3);
+
+console.log(buff7.length);  // 3
+console.log(buff7);  // <Buffer 01 02 03>
+```
+
+## 拷贝：buf.copy(target[, targetStart[, sourceStart[, sourceEnd]]])
+
+## 查找：buf.indexOf(value)、buf.lastIndexOf(value)
+
+
 
 ## 拷贝
 
@@ -267,3 +349,8 @@ var buff = Buffer.from(['062'])
 关于buffer内存空间的动态分配
 
 >Instances of the Buffer class are similar to arrays of integers but correspond to fixed-sized, raw memory allocations outside the V8 heap. The size of the Buffer is established when it is created and cannot be resized.
+
+## 相关链接
+
+unicode对照表
+https://unicode-table.com/cn/#control-character

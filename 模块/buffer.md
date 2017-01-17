@@ -100,6 +100,34 @@ console.log(buff.toString());  // 输出：buffer
 console.log(buff2.toString());  // 输出：auffer
 ```
 
+
+
+## TypedArray vs ArrayBuffer vs DataView
+
+>The DataView view provides a low-level interface for reading and writing multiple number types in an ArrayBuffer irrespective of the platform's endianness.
+
+在新的标准里面，js引入`TypedArray`，方便开发者像操作数组那样，操作二进制数据。需要注意的是，`TypedArray`这个构造函数本身不存在，它只是一类构造函数的统称而已，比如`Int8Array`。
+
+也就是说，这样使用是错误的。
+
+```js
+new TypedArray();  // 输出：ReferenceError: TypedArray is not defined
+```
+
+`TypedArray()`有包含下面清单，感兴趣的可以查看[这里](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray)：
+
+```js
+Int8Array();
+Uint8Array();
+Uint8ClampedArray();
+Int16Array();
+Uint16Array();
+Int32Array();
+Uint32Array();
+Float32Array();
+Float64Array();
+```
+
 ## 拷贝
 
 >Passing a string, array, or Buffer as the first argument copies the passed object's data into the Buffer.

@@ -419,6 +419,22 @@ buff.write('ab');  // 返回 2
 console.log(buff);  // 打印 <Buffer 61 62 00 00>
 ```
 
+## 填充：buf.fill(value[, offset[, end]][, encoding])
+
+用`value`填充buf，常用于初始化buf。参数说明如下：
+
+* value：用来填充的内容，可以是Buffer、String或Integer。
+* offset：从第几位开始填充，默认是0。
+* end：停止填充的位置，默认是 buf.length。
+* encoding：如果`value`是String，那么为`value`的编码，默认是utf8。
+
+例子：
+
+```js
+var buff = Buffer.alloc(20).fill('a');
+
+console.log(buff.toString());  // aaaaaaaaaaaaaaaaaaaa
+```
 
 ## 拷贝
 

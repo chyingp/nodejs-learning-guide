@@ -353,8 +353,71 @@ buf1.copy(buf2, 8, 16, 20);
 console.log(buf2.toString('ascii', 0, 25));
 ```
 
-## 查找：buf.indexOf(value)、buf.lastIndexOf(value)
+## 查找：buf.indexOf(value[, byteOffset][, encoding])
 
+跟数组的查找差不多，需要注意的是，value可能是String、Buffer、Integer中的任意类型。
+
+* String：如果是字符串，那么encoding就是其对应的编码，默认是utf8。
+* Buffer：如果是Buffer实例，那么会将value中的完整数据，跟buf进行对比。
+* Integer：如果是数字，那么value会被当做无符号的8位整数，取值范围是0到255。
+
+另外，可以通过`byteOffset`来指定起始查找位置。
+
+直接上代码，官方例子妥妥的，耐心看完它基本就理解得差不多了。
+
+```js
+const buf = Buffer.from('this is a buffer');
+
+// Prints: 0
+console.log(buf.indexOf('this'));
+
+// Prints: 2
+console.log(buf.indexOf('is'));
+
+// Prints: 8
+console.log(buf.indexOf(Buffer.from('a buffer')));
+
+// Prints: 8
+// (97 is the decimal ASCII value for 'a')
+console.log(buf.indexOf(97));
+
+// Prints: -1
+console.log(buf.indexOf(Buffer.from('a buffer example')));
+
+// Prints: 8
+console.log(buf.indexOf(Buffer.from('a buffer example').slice(0, 8)));
+
+
+const utf16Buffer = Buffer.from('\u039a\u0391\u03a3\u03a3\u0395', 'ucs2');
+
+// Prints: 4
+console.log(utf16Buffer.indexOf('\u03a3', 0, 'ucs2'));
+
+// Prints: 6
+console.log(utf16Buffer.indexOf('\u03a3', -4, 'ucs2'));
+```
+
+## 写：buf.write(string[, offset[, length]][, encoding])
+
+将sring写入buf实例，同时返回写入的字节数。
+
+参数如下：
+
+* string：写入的字符串。
+* offset：从buf的第几位开始写入，默认是0。
+* length：写入多少个字节，默认是 buf.length - offset。
+* encoding：字符串的编码，默认是utf8。
+
+看个简单例子
+
+```js
+var buff = Buffer.alloc(4);
+buff.write('a');  // 返回 1
+console.log(buff);  // 打印 <Buffer 61 00 00 00>
+
+buff.write('ab');  // 返回 2
+console.log(buff);  // 打印 <Buffer 61 62 00 00>
+```
 
 
 ## 拷贝
@@ -382,3 +445,6 @@ console.log(buf2.toString('ascii', 0, 25));
 
 unicode对照表
 https://unicode-table.com/cn/#control-character
+
+字符编码笔记：ASCII，Unicode和UTF-8
+http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html

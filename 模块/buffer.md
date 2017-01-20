@@ -456,34 +456,39 @@ var buff = Buffer.from('hello');
 console.log( buff.toJSON() );  // { type: 'Buffer', data: [ 104, 101, 108, 108, 111 ] }
 ```
 
-## 遍历：buf.values()
+## 遍历：buf.values()、buf.keys()、buf.entries()
 
 用于对`buf`进行`for...of`遍历，直接看例子。
 
 ```js
-var buff = Buffer.from('hello');
-var value;
+var buff = Buffer.from('abcde');
 
-// 方式一
-for(var i = 0; i < buff.length; i++){
-    console.log(buff[i]);
+for(const key of buff.keys()){
+    console.log('key is %d', key);
 }
+// key is 0
+// key is 1
+// key is 2
+// key is 3
+// key is 4
 
-// 104
-// 101
-// 108
-// 108
-// 111
-
-// 方式二
-for(value of buff.values()){
-    console.log(value); 
+for(const value of buff.values()){
+    console.log('value is %d', value);
 }
+// value is 97
+// value is 98
+// value is 99
+// value is 100
+// value is 101
 
-// 方式三
-for(value of buff){
-    console.log(value);     
+for(const pair of buff.entries()){
+    console.log('buff[%d] === %d', pair[0], pair[1]);
 }
+// buff[0] === 97
+// buff[1] === 98
+// buff[2] === 99
+// buff[3] === 100
+// buff[4] === 101
 ```
 
 ## 截取：buf.slice([start[, end]])

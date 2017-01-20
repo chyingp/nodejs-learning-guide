@@ -456,6 +456,36 @@ var buff = Buffer.from('hello');
 console.log( buff.toJSON() );  // { type: 'Buffer', data: [ 104, 101, 108, 108, 111 ] }
 ```
 
+## 遍历：buf.values()
+
+用于对`buf`进行`for...of`遍历，直接看例子。
+
+```js
+var buff = Buffer.from('hello');
+var value;
+
+// 方式一
+for(var i = 0; i < buff.length; i++){
+    console.log(buff[i]);
+}
+
+// 104
+// 101
+// 108
+// 108
+// 111
+
+// 方式二
+for(value of buff.values()){
+    console.log(value); 
+}
+
+// 方式三
+for(value of buff){
+    console.log(value);     
+}
+```
+
 ## 拷贝
 
 >Passing a string, array, or Buffer as the first argument copies the passed object's data into the Buffer.

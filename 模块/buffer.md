@@ -441,6 +441,19 @@ console.log(buff.toString());  // aaaaaaaaaaaaaaaaaaaa
 把buf解码成字符串，用法比较直观，看例子
 
 ```js
+var buff = Buffer.from('hello');
+
+console.log( buff.toString() );  // hello
+
+console.log( buff.toString('utf8', 0, 2) );  // he
+```
+
+## 转成JSON字符串：buf.toJSON()
+
+```js
+var buff = Buffer.from('hello');
+
+console.log( buff.toJSON() );  // { type: 'Buffer', data: [ 104, 101, 108, 108, 111 ] }
 ```
 
 ## 拷贝

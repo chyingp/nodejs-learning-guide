@@ -436,6 +436,13 @@ var buff = Buffer.alloc(20).fill('a');
 console.log(buff.toString());  // aaaaaaaaaaaaaaaaaaaa
 ```
 
+## 转成字符串: buf.toString([encoding[, start[, end]]])
+
+把buf解码成字符串，用法比较直观，看例子
+
+```js
+```
+
 ## 拷贝
 
 >Passing a string, array, or Buffer as the first argument copies the passed object's data into the Buffer.

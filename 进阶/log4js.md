@@ -47,7 +47,32 @@ blogger.info('hello');
 // [2017-02-28 22:36:57.574] [INFO] category-b - hello
 ```
 
+## appenders
 
+appenders指定日志输出的位置，可以同时配置多个，用category进行区分。比如 `log4js.getLogger('info')` 应用的就是 `type` 为 `dateFile` 的配置。
+
+可以注意到，`type` 为 `console` 的配置没有声明 `category` ，因此，所有的日志都会打印到控制台。
+
+```javascript
+var log4js = require('log4js');
+
+log4js.configure({
+    appenders: [
+        { type: 'console'},
+        { type: 'dateFile', filename: './logs/info.log', category: 'info' }
+    ]
+});
+
+var logger = log4js.getLogger('info');
+logger.setLevel('INFO');
+
+logger.trace('trace');
+logger.debug('debug');
+logger.info('info');
+
+// 输出如下：
+// [2017-02-28 22:51:30.723] [INFO] info - info
+```
 
 ## 相关链接
 

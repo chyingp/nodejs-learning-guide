@@ -1,0 +1,5 @@
+{
+  "appenders": [
+    { "type": "stdout" }
+  ]
+}

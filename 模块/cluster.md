@@ -58,7 +58,7 @@ cluster默认支持两种负载均衡策略，最常见的是第一种轮询。�
 * master进程：不做特殊处理。
 * worker进程：通过`cluster._getServer`来创建server。端口共享的秘密就在这里面了。
 
-假设有workerA、workerB，同时监听端口
+假设有workerA、workerB，同时监听端口`port`
 
 ```js
   if (cluster.isMaster || exclusive) {
@@ -73,6 +73,86 @@ cluster默认支持两种负载均衡策略，最常见的是第一种轮询。�
     fd: fd,
     flags: 0
   }, cb);
+```
+
+在master进程里，通过 cluster.fork() 创建子进程。
+
+cluster.fork() 内部调用了 child_process.fork() 来创建子进程。该进程监听 internalMessage
+
+```js
+worker.process.on('internalMessage', internal(worker, onmessage));
+```
+
+看下子进程，比如创建了server，并监听port。当调用 server.listen(port)时，由于 cluster.isMaster 为false，所以运行的是第二段代码
+
+```js
+  if (cluster.isMaster || exclusive) {
+    self._listen2(address, port, addressType, backlog, fd);
+    return;
+  }
+
+  // 子进程中，运行的是这段代码
+  cluster._getServer(self, {
+    address: address,
+    port: port,
+    addressType: addressType,
+    fd: fd,
+    flags: 0
+  }, cb);
+```
+
+看下 cluster._getServer() 的实现。
+
+```js
+  // obj is a net#Server or a dgram#Socket object.
+  cluster._getServer = function(obj, options, cb) {
+    const indexesKey = [ options.address,
+                         options.port,
+                         options.addressType,
+                         options.fd ].join(':');
+    if (indexes[indexesKey] === undefined)
+      indexes[indexesKey] = 0;
+    else
+      indexes[indexesKey]++;
+
+    const message = util._extend({
+      act: 'queryServer',
+      index: indexes[indexesKey],
+      data: null
+    }, options);
+
+    // Set custom data on handle (i.e. tls tickets key)
+    if (obj._getServerData) message.data = obj._getServerData();
+    send(message, function(reply, handle) {
+      if (obj._setServerData) obj._setServerData(reply.data);
+
+      if (handle)
+        shared(reply, handle, indexesKey, cb);  // Shared listen socket.
+      else
+        rr(reply, indexesKey, cb);              // Round-robin.
+    });
+    obj.once('listening', function() {
+      cluster.worker.state = 'listening';
+      const address = obj.address();
+      message.act = 'listening';
+      message.port = address && address.port || options.port;
+      send(message);
+    });
+  };
+```
+
+
+```js
+    handle.add(worker, function(errno, reply, handle) {
+      reply = util._extend({
+        errno: errno,
+        key: key,
+        ack: message.seq,
+        data: handles[key].data
+      }, reply);
+      if (errno) delete handles[key];  // Gives other workers a chance to retry.
+      send(worker, reply, handle);
+    });
 ```
 
 ## 代码备忘

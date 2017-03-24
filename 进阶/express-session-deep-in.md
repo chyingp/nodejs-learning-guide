@@ -1,5 +1,6 @@
 ## 写在前面
 
+本文先简单介绍session跟cookie的区别与联系，接着深入剖析`express-session`中间件的实现。关于`express-session`的基础使用，可参见笔者前面的文章。
 
 ## session vs cookie vs 登录态
 
@@ -77,72 +78,3 @@ app.use('/', function(req, res, next){
 ```
 
 
-各种配置项
-
-```js
-var cookieOptions = opts.cookie || {}
-
-  // get the session id generate function
-  var generateId = opts.genid || generateSessionId
-
-  // get the session cookie name
-  var name = opts.name || opts.key || 'connect.sid'
-
-  // get the session store
-  var store = opts.store || new MemoryStore()
-
-  // get the trust proxy setting
-  var trustProxy = opts.proxy
-
-  // get the resave session option
-  var resaveSession = opts.resave;
-
-  // get the rolling session option
-  var rollingSessions = Boolean(opts.rolling)
-
-  // get the save uninitialized session option
-  var saveUninitializedSession = opts.saveUninitialized
-
-  // get the cookie signing secret
-  var secret = opts.secret
-
-  if (typeof generateId !== 'function') {
-    throw new TypeError('genid option must be a function');
-  }
-
-  if (resaveSession === undefined) {
-    deprecate('undefined resave option; provide resave option');
-    resaveSession = true;
-  }
-
-  if (saveUninitializedSession === undefined) {
-    deprecate('undefined saveUninitialized option; provide saveUninitialized option');
-    saveUninitializedSession = true;
-  }
-
-  if (opts.unset && opts.unset !== 'destroy' && opts.unset !== 'keep') {
-    throw new TypeError('unset option must be "destroy" or "keep"');
-  }
-
-  // TODO: switch to "destroy" on next major
-  var unsetDestroy = opts.unset === 'destroy'
-
-  if (Array.isArray(secret) && secret.length === 0) {
-    throw new TypeError('secret option array must contain one or more strings');
-  }
-
-  if (secret && !Array.isArray(secret)) {
-    secret = [secret];
-  }
-
-  if (!secret) {
-    deprecate('req.secret; provide secret option');
-  }
-
-  // notify user that this store is not
-  // meant for a production environment
-  if ('production' == env && store instanceof MemoryStore) {
-    /* istanbul ignore next: not tested */
-    console.warn(warning);
-  }
-```

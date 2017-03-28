@@ -91,7 +91,85 @@ console.log( cryptPwd(password) );
 
 “加盐”这个词看上去很玄乎，其实原理很简单，就是在密码特定位置插入特定字符串后，再对修改后的字符串进行md5运算。
 
+例子如下，同样的密码，当“盐”值不一样时，md5值的差异非常大。通过密码加盐，可以防止最初级的暴力破解，如果攻击者事先不知道”盐“值，破解的难度就会非常大。
 
+```javascript
+var crypto = require('crypto');
+
+function cryptPwd(password, salt) {
+    // 密码“加盐”
+    var saltPassword = password + ':' + salt;
+    console.log('原始密码：%s', password);
+    console.log('加盐后的密码：%s', saltPassword);
+
+    // 加盐密码的md5值
+    var md5 = crypto.createHash('md5');
+    var result = md5.update(saltPassword).digest('hex');
+    console.log('加盐密码的md5值：%s', result);
+}
+
+cryptPwd('123456', 'abc');
+// 输出：
+// 原始密码：123456
+// 加盐后的密码：123456:abc
+// 加盐密码的md5值：51011af1892f59e74baf61f3d4389092
+
+cryptPwd('234567', 'abc');
+// 输出：
+// 原始密码：234567
+// 加盐后的密码：234567:abc
+// 加盐密码的md5值：e17c09cbb277ff7e9775f3d03eb518d5
+```
+
+### 随机盐值
+
+通过密码加盐，密码的安全性已经提高了不少。但其实上面的例子存在不少问题。
+
+假设字符串拼接算法、盐值已外泄，上面的代码至少存在下面问题：
+
+1. 短盐值：需要穷举的可能性较少，容易暴力破解，一般需要采用长盐值。
+2. 盐值固定：类似的，攻击者只需要把常用密码+盐值的hash值表算出来，就完事大吉了。
+
+短盐值自不必说，应该避免。对于为什么不应该使用固定盐值，这里需要多解释一下。很多时候，我们的盐值是硬编码到我们的代码里的（比如配置文件），一旦坏人通过某种手段获知了盐值，那么，只需要针对这串固定的盐值进行暴力穷举就行了。
+
+比如上面的代码，当你知道盐值是`abc`时，立刻就能猜到`51011af1892f59e74baf61f3d4389092`对应的明文密码是`123456`。
+
+那么，该怎么优化呢？答案是：随机盐值。
+
+
+```javascript
+var crypto = require('crypto');
+
+function getRandomSalt(){
+    return Math.random().toString().slice(2, 5);
+}
+
+function cryptPwd(password, salt) {
+    // 密码“加盐”
+    var saltPassword = password + ':' + salt;
+    console.log('原始密码：%s', password);
+    console.log('加盐后的密码：%s', saltPassword);
+
+    // 加盐密码的md5值
+    var md5 = crypto.createHash('md5');
+    var result = md5.update(saltPassword).digest('hex');
+    console.log('加盐密码的md5值：%s', result);
+}
+
+var password = '123456';
+
+cryptPwd('123456', getRandomSalt());
+// 输出：
+// 原始密码：123456
+// 加盐后的密码：123456:498
+// 加盐密码的md5值：af3b7d32cc2a254a6bf1ebdcfd700115
+
+cryptPwd('123456', getRandomSalt());
+// 输出：
+// 原始密码：123456
+// 加盐后的密码：123456:287
+// 加盐密码的md5值：65d7dd044c2db64c5e658d947578d759
+```
 
 ## 相关链接
 

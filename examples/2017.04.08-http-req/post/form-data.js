@@ -4,11 +4,21 @@ var url = require('url');
 var querystring = require('querystring');
 
 var server = http.createServer(function(req, res, next){
+
+	// POST /post HTTP/1.1	
+	// Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW	
+
+	// ------WebKitFormBoundary7MA4YWxkTrZu0gW
+	// Content-Disposition: form-data; name="nick"
+
+	// chyingp
+	// ------WebKitFormBoundary7MA4YWxkTrZu0gW
+	// Content-Disposition: form-data; name="gender"
+
+	// man
+	// ------WebKitFormBoundary7MA4YWxkTrZu0gW--	
 	
 	var contentType = req.headers['content-type'];  // multipart/form-data
-
-	console.log(contentType);
-
 	var boundary = contentType.split('; ')[1].split('=')[1];  // ----WebKitFormBoundary7MA4YWxkTrZu0gW
 	var method = req.method;  // POST
 	var chunk = Buffer.alloc(0);

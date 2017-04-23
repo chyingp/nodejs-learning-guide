@@ -393,3 +393,15 @@ http://stackoverflow.com/questions/2701294/how-does-the-elliptic-curve-version-o
 
 Example application for working with SPKAC (signed public key & challege) data coming from the <keygen> element.
 https://github.com/jas-/node-spkac
+
+Using Padding in Encryption
+http://www.di-mgt.com.au/cryptopad.html#randompadding
+
+对称加密和分组加密中的四种模式(ECB、CBC、CFB、OFB)
+http://www.cnblogs.com/happyhippy/archive/2006/12/23/601353.html
+
+分组密码工作模式
+https://zh.wikipedia.org/wiki/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E5%B7%A5%E4%BD%9C%E6%A8%A1%E5%BC%8F#.E5.AF.86.E7.A0.81.E5.9D.97.E9.93.BE.E6.8E.A5.EF.BC.88CBC.EF.BC.89
+
+为什么说密文链接模式已经丧失安全性？
+https://www.zhihu.com/question/26437065

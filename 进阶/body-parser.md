@@ -1,0 +1,24 @@
+## 基础例子
+
+## 设计要点
+
+请求方法：GET/POST/...
+编码：UTF8/GBK/GB2312/...
+内容类型：text、text/json、application/x-www-form-urlencoded、...
+是否压缩：deflare、gzip等
+
+排除类型：form/multi-part
+
+异常处理：数据长度是否对（content-length)
+
+## 解析text
+
+## 解析json
+
+## 解析
+
+
+## 相关链接
+
+https://github.com/expressjs/body-parser/
+

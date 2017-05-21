@@ -6,6 +6,7 @@
 编码：UTF8/GBK/GB2312/...
 内容类型：text、text/json、application/x-www-form-urlencoded、...
 是否压缩：deflare、gzip等
+长度限制：是否有request body最大限制
 
 排除类型：form/multi-part
 

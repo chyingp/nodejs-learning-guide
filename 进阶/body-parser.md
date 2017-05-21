@@ -9,13 +9,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 本文从简单的例子出发，探究`body-parser`的内部实现。至于`body-parser`如何使用，感兴趣的同学可以参考[官方文档](https://github.com/expressjs/body-parser/)。
 
-## 入门基础准备
+## 入门基础
 
-在正式讲解前，我们先来看一个POST请求的报文，如下所示。其中需要我们注意的有：
-
-* chyingp：报文主体，这里是个普通的文本字符串。
-* Content-Type：请求报文主体的类型、编码。常见的类型有`text/plain`、`application/json`、`application/x-www-form-urlencoded`。常见的编码有`utf8`、`gbk`等。
-* Content-Encoding：声明报文主体的压缩格式，常见的取值有`gzip`、`deflate`、`identity`。
+在正式讲解前，我们先来看一个POST请求的报文，如下所示。
 
 ```http
 POST /test HTTP/1.1
@@ -26,14 +22,24 @@ Content-Encoding: gzip
 chyingp
 ```
 
-从上面的请求报文，大致可以推测`body-parser`实现的要点：
+其中需要我们注意的有`Content-Type`、`Content-Encoding`以及报文主体：
 
-1. 处理不同类型的请求体：比如`text`、`json`、`urlencoded`等。
+* Content-Type：请求报文主体的类型、编码。常见的类型有`text/plain`、`application/json`、`application/x-www-form-urlencoded`。常见的编码有`utf8`、`gbk`等。
+* Content-Encoding：声明报文主体的压缩格式，常见的取值有`gzip`、`deflate`、`identity`。
+* 报文主体：这里是个普通的文本字符串`chyingp`。
+
+## body-parser主要做了什么
+
+`body-parser`实现的要点如下：
+
+1. 处理不同类型的请求体：比如`text`、`json`、`urlencoded`等，对应的报文主体的格式不同。
 2. 处理不同的编码：比如`utf8`、`gbk`等。
-3. 处理不同的压缩类型：比如`gbk`、`deflare`等。
+3. 处理不同的压缩类型：比如`gzip`、`deflare`等。
 4. 其他边界、异常的处理。
 
-## 处理不同类型请求体
+## 一、处理不同类型请求体
+
+为了方便读者测试，以下例子均包含服务端、客户端代码，完整代码可在[笔者github](https://github.com/chyingp/nodejs-learning-guide/tree/master/examples/2017.05.20-express-body-parser)上找到。
 
 ### 解析text/plain
 
@@ -60,13 +66,12 @@ var client = http.request(options, (res) => {
 client.end('chyingp');
 ```
 
-服务端代码如下，`text/plain`类型处理比较简单，就是buffer的拼接。
+服务端代码如下。`text/plain`类型处理比较简单，就是buffer的拼接。
 
 ```javascript
 var http = require('http');
 
 var parsePostBody = function (req, done) {
-    // var length = req.headers['content-length'] - 0;
     var arr = [];
     var chunks;
 
@@ -92,7 +97,7 @@ server.listen(3000);
 
 ### 解析application/json
 
-客户端代码如下：
+客户端代码如下，把`Content-Type`换成`application/json`。
 
 ```javascript
 var http = require('http');
@@ -120,7 +125,7 @@ var client = http.request(options, (res) => {
 client.end( JSON.stringify(jsonBody) );
 ```
 
-服务端代码如下，相比`text/plain`，只是多了个json解析的过程。
+服务端代码如下，相比`text/plain`，只是多了个`JSON.parse()`的过程。
 
 ```javascript
 var http = require('http');
@@ -209,11 +214,11 @@ var server = http.createServer(function (req, res) {
 server.listen(3000);
 ```
 
-## 处理不同编码
+## 二、处理不同编码
 
-很多时候，来自客户端的请求，采用的不一定是默认的`utf8`编码，这个时候，就需要对请求进行解码处理
+很多时候，来自客户端的请求，采用的不一定是默认的`utf8`编码，这个时候，就需要对请求体进行解码处理。
 
-客户端请求如下，可以看到，这次对请求体进行了`gbk`编码，这里有两个要点。
+客户端请求如下，有两个要点。
 
 1. 编码声明：在`Content-Type`最后加上` ;charset=gbk`
 2. 请求体编码：这里借助了`iconv-lite`，对请求体进行编码`iconv.encode('程序猿小卡', encoding)`
@@ -253,7 +258,6 @@ var contentType = require('content-type');
 var iconv = require('iconv-lite');
 
 var parsePostBody = function (req, done) {
-    // var length = req.headers['content-length'] - 0;
     var obj = contentType.parse(req.headers['content-type']);
     var charset = obj.parameters.charset;  // 编码判断：这里获取到的值是 'gbk'
 
@@ -280,7 +284,7 @@ var server = http.createServer(function (req, res) {
 server.listen(3000);
 ```
 
-## 处理不同压缩类型
+## 三、处理不同压缩类型
 
 这里举个`gzip`压缩的例子。客户端代码如下，要点如下：
 
@@ -358,8 +362,12 @@ server.listen(3000);
 
 `body-parser`的核心实现并不复杂，翻看源码后你会发现，更多的代码是在处理异常跟边界。
 
-另外，对于POST请求，还有一个非常常见的`Content-Type`是`multipart/form-data`，这个的处理相对复杂些，`body-parser`不打算对其进行支持，后续章节再继续展开。
+另外，对于POST请求，还有一个非常常见的`Content-Type`是`multipart/form-data`，这个的处理相对复杂些，`body-parser`不打算对其进行支持。篇幅有限，后续章节再继续展开。
+
+欢迎交流，如有错漏请指出。
 
 ## 相关链接
 
 https://github.com/expressjs/body-parser/
+
+https://github.com/ashtuchkin/iconv-lite

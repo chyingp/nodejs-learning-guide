@@ -1,22 +1,25 @@
 var http = require('http');
 
-var parseText = function (req, done) {
+var parseJSON = function (req, done) {
     var length = req.headers['content-length'] - 0;
     var arr = [];
-    var body;
+    var chunks;
 
     req.on('data', buff => {
         arr.push(buff);
     });
 
     req.on('end', () => {
-        body = Buffer.concat(arr);
-        done(body);
+        chunks = Buffer.concat(arr);
+        done(chunks);
     });
 };
 
 var server = http.createServer(function (req, res) {
-    parseText(req, (body) => res.end(body));
+    parseJSON(req, (chunks) => {
+        var json = JSON.parse( chunks.toString() );        
+        res.end(`Your nick is ${json.nick}`)
+    });
 });
 
 server.listen(3000);

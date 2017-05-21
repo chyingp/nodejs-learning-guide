@@ -14,10 +14,11 @@ var options = {
     }
 };
 
+// 备注：nodejs本身不支持gbk编码，所以请求发送前，需要先进行编码
+var buff = iconv.encode('程序猿小卡', encoding);
+
 var client = http.request(options, (res) => {
     res.pipe(process.stdout);
 });
-
-var buff = iconv.encode('程序猿小卡', encoding);
 
 client.end(buff, encoding);

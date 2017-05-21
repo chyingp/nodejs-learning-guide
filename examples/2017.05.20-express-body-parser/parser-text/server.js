@@ -1,6 +1,6 @@
 var http = require('http');
 
-var parseText = function (req, done) {
+var parsePostBody = function (req, done) {
     var length = req.headers['content-length'] - 0;
     var arr = [];
     var chunks;
@@ -16,7 +16,7 @@ var parseText = function (req, done) {
 };
 
 var server = http.createServer(function (req, res) {
-    parseText(req, (chunks) => {
+    parsePostBody(req, (chunks) => {
         var body = chunks.toString();
         res.end(`Your nick is ${body}`)
     });

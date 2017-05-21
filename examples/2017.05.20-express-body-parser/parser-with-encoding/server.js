@@ -2,7 +2,7 @@ var http = require('http');
 var contentType = require('content-type');
 var iconv = require('iconv-lite');
 
-var parseText = function (req, done) {
+var parsePostBody = function (req, done) {
     var length = req.headers['content-length'] - 0;
     var obj = contentType.parse(req.headers['content-type']);
     var charset = obj.parameters.charset;  // request body 编码
@@ -22,7 +22,7 @@ var parseText = function (req, done) {
 };
 
 var server = http.createServer(function (req, res) {
-    parseText(req, (body) => {
+    parsePostBody(req, (body) => {
         res.end(`Your nick is ${body}`)
     });
 });

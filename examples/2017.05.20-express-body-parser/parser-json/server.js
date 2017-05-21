@@ -1,6 +1,6 @@
 var http = require('http');
 
-var parseJSON = function (req, done) {
+var parsePostBody = function (req, done) {
     var length = req.headers['content-length'] - 0;
     var arr = [];
     var chunks;
@@ -16,7 +16,7 @@ var parseJSON = function (req, done) {
 };
 
 var server = http.createServer(function (req, res) {
-    parseJSON(req, (chunks) => {
+    parsePostBody(req, (chunks) => {
         var json = JSON.parse( chunks.toString() );        
         res.end(`Your nick is ${json.nick}`)
     });

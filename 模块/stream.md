@@ -27,7 +27,6 @@ fs.createReadStream('./sample.txt').pipe(process.stdout);
 
 以下都是nodejs中常见的Readable Stream，当然还有其他的，可自行查看文档。
 
-* http.ServerResponse
 * http.IncomingRequest
 * fs.createReadStream()
 * process.stdin
@@ -39,7 +38,8 @@ fs.createReadStream('./sample.txt').pipe(process.stdout);
 var fs = require('fs');
 
 fs.readFile('./sample.txt', 'utf8', function(err, content){
-    console.log('文件读取完成，文件内容是\n[%s]', content);
+	// 文件读取完成，文件内容是 [你好，我是程序猿小卡]
+	console.log('文件读取完成，文件内容是 [%s]', content);
 });
 ```
 
@@ -54,11 +54,12 @@ var content = '';
 readStream.setEncoding('utf8');
 
 readStream.on('data', function(chunk){
-    content += chunk;
+	content += chunk;
 });
 
 readStream.on('end', function(chunk){
-    console.log('文件读取完成，文件内容是\n[%s]', content);
+	// 文件读取完成，文件内容是 [你好，我是程序猿小卡]
+	console.log('文件读取完成，文件内容是 [%s]', content);
 });
 ```
 
@@ -78,14 +79,17 @@ fs.createReadStream('./sample.txt').pipe(process.stdout);
 var fs = require('fs');
 
 var onEnd = function(){
-    process.stdout.write(']');  
+	process.stdout.write(']');	
 };
 
 var fileStream = fs.createReadStream('./sample.txt');
+fileStream.on('end', onEnd)
+
+fileStream.pipe(process.stdout);
 
 process.stdout.write('文件读取完成，文件内容是[');
 
-fileStream.on('end', onEnd).pipe(process.stdout);;
+// 文件读取完成，文件内容是[你好，我是程序猿小卡]
 ```
 
 ## Writable Stream

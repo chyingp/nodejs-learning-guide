@@ -5,10 +5,10 @@ var onEnd = function(){
 };
 
 var fileStream = fs.createReadStream('./sample.txt');
+fileStream.on('end', onEnd)
+
+fileStream.pipe(process.stdout);
 
 process.stdout.write('文件读取完成，文件内容是[');
 
-fileStream.on('end', onEnd).pipe(process.stdout);;
-
-
-
+// 文件读取完成，文件内容是[你好，我是程序猿小卡]

@@ -47,6 +47,7 @@ Nodejs学习过程中的一些总结，可[点击这里](https://github.com/chyi
 ---
 
 * 进阶使用
+  * [Nodejs 进阶：Express 常用中间件 body-parser 实现解析(ok)](进阶/body-parser.md)
   * [基于express+muter的文件上传(ok)](进阶/文件上传-multer.md)
   * [将图片转成datauri嵌入到html(ok)](/进阶/图片地址转成datauri.md)
   * [本地调试远程服务器上的Node代码(ok)](/模块/debug.md)

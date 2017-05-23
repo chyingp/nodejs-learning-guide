@@ -166,7 +166,7 @@ client.on('data', function(data){
 
 ## Transform Stream
 
-Transform stream是Duplex stream的特例，也就是说，Transform stream也同时可读可写。
+Transform stream是Duplex stream的特例，也就是说，Transform stream也同时可读可写。跟Duplex stream的区别点在于，Transform stream的输出与输入是存在相关性的。
 
 常见的Transform stream包括`zlib`、`crypto`，这里举个简单例子：文件的gzip压缩。
 
@@ -181,8 +181,6 @@ var out = fs.createWriteStream('./extra/fileForCompress.txt.gz');
 
 inFile.pipe(gzip).pipe(out);
 ```
-
-## 自定义Stream
 
 ## 相关链接
 

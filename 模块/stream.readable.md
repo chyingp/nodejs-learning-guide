@@ -166,3 +166,60 @@ readstream.on('end', function() {
 // readable: null
 // end
 ```
+
+## pipe方法
+
+>stream.pipe(dest, {end: true})
+
+stream.pipe(dest)返回dest，也就是说可以链式调用 stream.pipe(dest1).pipe(dest2)...
+
+```javascript
+var fs = require('fs');
+var r = fs.createReadStream('./hello.txt');
+var z = require('zlib').createGzip();
+var w = fs.createWriteStream('./hello.txt.gz');
+
+r.pipe(z).pipe(w);
+```
+
+当end为true（默认）时，当数据读取结束，dest会自动关闭；否则dest不自动关闭。
+
+例子：end事件触发时，dest已经被关闭，此时再往dest写数据，报错
+
+```javascript
+var fs = require('fs');
+var src = fs.createReadStream('./hello.txt');
+var dest = fs.createWriteStream('./dest.txt');
+
+src.pipe(dest);
+
+src.on('end', function () {
+    try{
+        dest.end(' end');
+    }catch(error){
+        console.log('error! error.message is %s', error.message);
+    }
+    
+    console.log('end');
+});
+
+// 输出：
+// error! error.message is write after end
+// end
+```
+
+显示声明`end`为`true`，成功写入。
+
+```javascript
+var fs = require('fs');
+var src = fs.createReadStream('./hello.txt');
+var dest = fs.createWriteStream('./dest.txt');
+
+src.pipe(dest, { end: false });
+
+src.on('end', function () {
+    dest.end(' end');
+    console.log('end');
+});
+```
+

@@ -47,6 +47,7 @@ Nodejs学习过程中的一些总结，可[点击这里](https://github.com/chyi
 ---
 
 * 进阶使用
+  * [Nodejs进阶：MD5入门介绍及crypto模块的应用(ok)](模块/crypto.md5.md)
   * [Nodejs 进阶：Express 常用中间件 body-parser 实现解析(ok)](进阶/body-parser.md)
   * [基于express+muter的文件上传(ok)](进阶/文件上传-multer.md)
   * [将图片转成datauri嵌入到html(ok)](/进阶/图片地址转成datauri.md)
@@ -56,5 +57,3 @@ Nodejs学习过程中的一些总结，可[点击这里](https://github.com/chyi
   * [调试日志打印：debug模块](/进阶/debug-log.md)
   * express进阶：多模板引擎支持
   * 基于 express + XHR 的跨域资源请求
-
-

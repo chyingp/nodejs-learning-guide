@@ -146,3 +146,23 @@ events.js:160
 Error: ENOENT: no such file or directory, open './none-exists.txt'
     at Error (native)
 ```
+
+## readable事件
+
+1. 触发时机：当有数据可读时，或者数据已经读完，但是end尚未触发（感觉这样设计不合理）
+
+```javascript
+var fs = require('fs');
+var readstream = fs.createReadStream('./hello.txt');
+readstream.on('readable', function() {
+  console.log('readable: %s', readstream.read());
+});
+readstream.on('end', function() {
+  console.log('end');
+});
+
+// 输出：
+// readable: hello world
+// readable: null
+// end
+```

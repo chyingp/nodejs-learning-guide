@@ -5,12 +5,11 @@ var opt = {
 };
 
 var client = net.connect(opt, function(){
-	console.log('连接上服务端啦');
-	client.write('你好服务端');  // 可写
+	client.write('msg from client');  // 可写
 });
 
 // 可读
 client.on('data', function(data){
-	console.log('收到来自服务端的数据%s', data);
+	console.log('client: got reply from server [%s]', data);
 	client.end();
 });

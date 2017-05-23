@@ -120,24 +120,47 @@ writeStram.end();
 
 ## Duplex Stream
 
-最常见的Duplex stream应该就是`net.Socket`实例了，在前面的文章里有接触过，这里就直接上代码了。
+最常见的Duplex stream应该就是`net.Socket`实例了，在前面的文章里有接触过，这里就直接上代码了，这里包含服务端代码、客户端代码。
+
+服务端代码：
 
 ```js
 var net = require('net');
 var opt = {
-    host: '127.0.0.1',
-    port: '3000'
+	host: '127.0.0.1',
+	port: '3000'
 };
 
 var client = net.connect(opt, function(){
-    console.log('连接上服务端啦');
-    client.write('你好服务端');  // 可写
+	client.write('msg from client');  // 可写
 });
 
 // 可读
 client.on('data', function(data){
-    console.log('收到来自服务端的数据%s', data);
-    client.end();
+    // server: msg from client [msg from client]
+	console.log('client: got reply from server [%s]', data);
+	client.end();
+});
+```
+
+客户端代码：
+
+```js
+var net = require('net');
+var opt = {
+	host: '127.0.0.1',
+	port: '3000'
+};
+
+var client = net.connect(opt, function(){
+	client.write('msg from client');  // 可写
+});
+
+// 可读
+client.on('data', function(data){
+    // lient: got reply from server [reply from server]
+	console.log('client: got reply from server [%s]', data);
+	client.end();
 });
 ```
 

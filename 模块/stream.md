@@ -1,6 +1,6 @@
 ## 模块概览
 
-nodejs的核心模块，基本上所有的核心模块都是stream的的实例，比如process.stdout、http.clientRequest。
+nodejs的核心模块，基本上都是stream的的实例，比如process.stdout、http.clientRequest。
 
 对于大部分的nodejs开发者来说，平常并不会直接用到stream模块，只需要了解stream的运行机制即可（非常重要）。
 

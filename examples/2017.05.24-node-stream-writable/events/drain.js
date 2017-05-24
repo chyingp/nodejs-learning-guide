@@ -1,25 +1,26 @@
-// Write the data to the supplied writable stream one million times.
-// Be attentive to back-pressure.
-function writeOneMillionTimes(writer, data, encoding, callback) {
-  let i = 1000000;
-  write();
-  function write() {
-    var ok = true;
-    do {
-      i--;
-      if (i === 0) {
-        // last time!
-        writer.write(data, encoding, callback);
-      } else {
-        // see if we should continue, or wait
-        // don't pass the callback, because we're not done yet.
-        ok = writer.write(data, encoding);
-      }
-    } while (i > 0 && ok);
-    if (i > 0) {
-      // had to stop early!
-      // write some more once it drains
-      writer.once('drain', write);
+var max = 64 * 1024;
+var buff = Buffer.from('a'.repeat(max));
+
+var fs = require('fs');
+var dest = fs.createWriteStream('./dest.txt', {flags: 'w'});
+
+var index = 0;
+
+function write () {
+    var ret;
+    for(; index <= max - 1; index++) {
+        ret = dest.write(Buffer.from('a'));
+        if(ret === false){
+            console.log('暂时不能写入数据，index === %d', index);
+            break;
+        }
     }
-  }
+    if(index === max -1) dest.end();
 }
+
+dest.on('drain', function () {
+    console.log('drain触发，继续写入数据');
+    write();
+});
+
+write();

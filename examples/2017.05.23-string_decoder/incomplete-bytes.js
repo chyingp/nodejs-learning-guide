@@ -7,4 +7,3 @@ console.log(str);  // 你
 
 str = decoder.write(Buffer.from([0xbd]));
 console.log(str);  // 好
-

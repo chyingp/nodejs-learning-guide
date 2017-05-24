@@ -39,7 +39,7 @@ Nodejs学习过程中的一些总结，可[点击这里](https://github.com/chyi
   * 命令行设计-repl
   * [实用工具模块-util(ok)](模块/util.md)
   * [流操作-stream(ok)](模块/stream.md)
-  * 二进制解码-string\_decoder
+  * [二进制解码-string\_decoder](模块/string_decoder.md)
   * 定时器-timers
   * 安全加密-tls
 

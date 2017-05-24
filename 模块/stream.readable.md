@@ -298,3 +298,18 @@ readable.on('readable', function (chunk) {
 // Received 32 kb of data.
 // Received 6 kb of data.
 ```
+
+## readable.unpipe([destination])
+
+作用：停止向 destination 写入数据。
+参数：destination 可选，如果没有指定，则对所有 dest 的写入都被停止。
+
+例子：略
+
+## readable.unshift(chunk)
+
+
+
+>Note: The stream.unshift(chunk) method cannot be called after the 'end' event has been emitted or a runtime error will be thrown.
+
+>Developers using stream.unshift() often should consider switching to use of a Transform stream instead. See the API for Stream Implementers section for more information.

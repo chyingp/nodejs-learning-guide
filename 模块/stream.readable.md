@@ -33,6 +33,18 @@ setTimeout(function() {
 3. content is [ %s ]hello world
 ```
 
+## 三种状态
+
+* readable._readableState.flowing = null
+* readable._readableState.flowing = false
+* readable._readableState.flowing = true
+
+分别解释下：
+
+* null：当前还没有地方在消费数据（比如调用readable.pipe(dst)或者readable.on('data', fn)），此时为null。
+* true：当前正在消费数据（比如调用readable.pipe(dst)或者readable.on('data', fn)），此时为true；
+* false：调用比如`readable.pause()`、`readable.unpipe()`，会将状态置为false。需要注意的时，状态为false不代表不生产数据。有可能没有地方消费数据，但数据还在继续产生，并在internal buffer里缓存起来。
+
 ## close事件
 
 1. close事件触发的含义：接下来不会再有新的事件抛出。

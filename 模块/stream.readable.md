@@ -223,3 +223,78 @@ src.on('end', function () {
 });
 ```
 
+## read(size)方法
+
+作用：读取internal buffer中的数据（在paused模式下使用）
+参数说明：size，要读取的字节数
+返回：Buffer 或者 String 或者 null
+
+* Buffer：默认返回类型。
+* String：当已调用了stream.setEncoding(encoding) 时，返回String类型。
+* null：当前没有数据可以读取。（比如已经全部读完，或者读取的速度过快，当前internal buffer还没进入可读取状态）
+
+如果指定了size，且
+
+1. 当前还没有足够的数据可以读取，返回null
+2. 如果stram已经end了，那么一次性返回internal buffer中的所有数据（有可能超过size大小）
+
+>The optional size argument specifies a specific number of bytes to read. If size bytes are not available to be read, null will be returned unless the stream has ended, in which case all of the data remaining in the internal buffer will be returned (even if it exceeds size bytes).
+
+如果没有指定size，那么，internal buffer中的所有数据一次性返回。
+
+>If the size argument is not specified, all of the data contained in the internal buffer will be returned.
+
+如果 readable.read() 返回了数据，那么 data 事件会被触发。
+
+>Note: If the readable.read() method returns a chunk of data, a 'data' event will also be emitted.
+
+通过 fs.createReadStream(path, options) 创建的 stream，internal buffer 的大小为 64kb 
+
+>Be aware that, unlike the default value set for highWaterMark on a readable stream (16 kb), the stream returned by this method has a default value of 64 kb for the same parameter.
+
+看例子：
+
+```javascript
+var fs = require('fs');
+var readable = fs.createReadStream('./jquery-3.2.1.js');
+
+readable.on('readable', function (chunk) {
+  var chunk;  
+  while (null !== (chunk = readable.read())) {
+    console.log(`Received ${Math.ceil(chunk.length/1024)} kb of data.`);
+  }    
+});
+
+// 输出
+// Received 64 kb of data.
+// Received 64 kb of data.
+// Received 64 kb of data.
+// Received 64 kb of data.
+// Received 6 kb of data.
+```
+
+试下指定size
+
+```javascript
+var fs = require('fs');
+var readable = fs.createReadStream('./jquery-3.2.1.js');
+var size = 1024 * 32;  // 32k
+
+readable.on('readable', function (chunk) {
+  var chunk;  
+  while (null !== (chunk = readable.read(size))) {
+    console.log(`Received ${Math.ceil(chunk.length/1024)} kb of data.`);
+  }    
+});
+
+// 输出
+// Received 32 kb of data.
+// Received 32 kb of data.
+// Received 32 kb of data.
+// Received 32 kb of data.
+// Received 32 kb of data.
+// Received 32 kb of data.
+// Received 32 kb of data.
+// Received 32 kb of data.
+// Received 6 kb of data.
+```

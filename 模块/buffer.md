@@ -1,6 +1,8 @@
 ## 模块概览
 
-Buffer是node的全局模块，开发者可以利用它来处理二进制数据。比如Stream模块内部就大量用到了Buffer。
+Buffer是node的核心模块，开发者可以利用它来处理二进制数据，比如文件流的读写、网络请求数据的处理等。
+
+Buffer的API非常多，本文仅挑选 比较常用/容易理解 的API进行讲解，包括Buffer实例的创建、比较、连接、拷贝、查找、遍历、类型转换、截取、编码转换等。
 
 ## 创建
 
@@ -482,14 +484,13 @@ buff3[0] = 97;  // parseInt(61, 16) ==> 97
 console.log(buff1);  // <Buffer 62 63>
 ```
 
-
 ## TODO
 
-1、创建、拷贝、截取、转换、查找
-2、buffer、arraybuffer、dataview、typedarray
-3、buffer vs 编码
-4、Buffer.from()、Buffer.alloc()、Buffer.alocUnsafe()
-5、Buffer vs TypedArray
+1. 创建、拷贝、截取、转换、查找
+2. buffer、arraybuffer、dataview、typedarray
+3. buffer vs 编码
+4. Buffer.from()、Buffer.alloc()、Buffer.alocUnsafe()
+5. Buffer vs TypedArray
 
 ## 文档摘要
 

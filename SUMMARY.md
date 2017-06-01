@@ -16,7 +16,7 @@
   * [网络地址解析-url\(ok\)](模块/url.md)
   * 数据加密-crypto
   * [URL查询字符串-querystring\(ok\)](模块/querystring.md)
-  * [二进制数据-buffer](模块/buffer.md)
+  * [二进制数据-buffer\(ok\)](模块/buffer.md)
   * [子进程-child\_process](模块/child_process.md)
   * [进程相关-process(ok)](模块/process.md)
   * 集群-cluster

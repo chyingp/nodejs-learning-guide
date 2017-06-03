@@ -121,4 +121,6 @@ world
 
 ## 相关链接
 
-https://nodejs.org/api/n-api.html
+N-API：https://nodejs.org/api/n-api.html
+
+C++ Addons：https://nodejs.org/api/addons.html

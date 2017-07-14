@@ -201,7 +201,6 @@ console.log( crypted );
 
 var decrypted = decrypt( crypted );
 console.log( decrypted );  // 输出：utf8
-
 ```
 
 ## 数字签名/签名校验

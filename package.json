@@ -1,0 +1,28 @@
+{
+  "name": "nodejs-learning-guide",
+  "version": "1.0.0",
+  "description": "Nodejs学习过程中的一些总结，可[点击这里](https://github.com/chyingp/nodejs-learning-guide)查看完整版。欢迎入群交流，群号 197339705 。<a target=\"_blank\" href=\"http://shang.qq.com/wpa/qunwpa?idkey=7e4f670e1cd9278f30003965a1cc068a4f30d8c73aa071c8da189f4842dbbee6\"><img border=\"0\" src=\"http://pub.idqqimg.com/wpa/images/group.png\" alt=\"express/node交流群\" title=\"express/node交流群\"></a>",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chyingp/nodejs-learning-guide.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chyingp/nodejs-learning-guide/issues"
+  },
+  "homepage": "https://github.com/chyingp/nodejs-learning-guide#readme",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "concat-stream": "^1.6.0",
+    "content-type": "^1.0.2",
+    "express": "^4.15.3",
+    "iconv-lite": "^0.4.17",
+    "through": "^2.3.8"
+  }
+}

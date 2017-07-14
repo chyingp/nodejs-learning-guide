@@ -1,12 +1,18 @@
 ## 前言
 
-在node程序开发中时，经常需要打印调试日志。用的比较多的是debug模块，下文简单举几个例子进行说明。
+在node程序开发中时，经常需要打印调试日志。用的比较多的是debug模块，比如express框架中就用到了。下文简单举几个例子进行说明。文中相关代码示例，可在[这里](https://github.com/chyingp/nodejs-learning-guide/tree/master/examples/2017.01.16-debug-log/debug)找到。
 
 >备注：node在0.11.3版本也加入了util.debuglog()用于打印调试日志，使用方法跟debug模块大同小异。
 
 ## 基础例子
 
-使用很简单，运行node程序时，加上`DEBUG=Aapp`环境变量即可。
+首先，安装`debug`模块。
+
+```bash
+npm install debug
+```
+
+使用很简单，运行node程序时，加上`DEBUG=app`环境变量即可。
 
 ```javascript
 /**

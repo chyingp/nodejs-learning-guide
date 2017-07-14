@@ -31,22 +31,6 @@ session是保存在服务端的小段数据，cookie是保存在用户本地的�
 4. 服务端：查找本地session.txt，发现`uid=zhang`这条记录，判断用户已登录。
 5. 服务端：返回个人主页。
 
-## 登录 vs 登录态检验
-
-### 常见登录步骤：
-
-用户输入用户名、密码 -> 发送登录请求到服务端 -> 服务端校验用户名、密码 -> 校验通过，通过Set-Cookie设置登录态相关的cookie（假设isLogined=1）
-
-### 登录态验证步骤：
-
-用户访问网站 -> 请求到达服务端 -> 检查req.headers.cookies，isLogined 是否为1 -> 如是，已登录；
-
-### 其他
-
-1. 防止cookie篡改
-2. 登录态超时机制
-3. 登录态主动失效机制
-
 ## express-session实现原理
 
 关键配置如下。其中，`saveUninitialized`若为`true`，对状态为“未初始化”的会话，服务端会自动为该会话创建session id，并保存到本地。
@@ -77,4 +61,12 @@ app.use('/', function(req, res, next){
 });
 ```
 
+## 跟cookie-parser的关联
 
+
+
+## 关注点
+
+1. 防止cookie篡改
+2. 登录态超时机制
+3. 登录态主动失效机制

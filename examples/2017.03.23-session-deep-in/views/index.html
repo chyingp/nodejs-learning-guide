@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>会话管理</title>
+</head>
+<body>
+
+<h1>会话管理</h1>
+
+<% if(isLogined){ %>
+	<p>当前登录用户：<%= name %>，<a href="/logout" id="logout">退出登陆</a></p>
+<% }else{ %>
+	<form method="POST" action="/login">
+		<input type="text" id="name" name="name" value="chyingp" />
+		<input type="password" id="password" name="password" value="123456" />
+		<input type="submit" value="登录" id="login" />
+	</form>
+<% } %>	
+
+<script type="text/javascript" src="/jquery-3.1.0.min.js"></script>
+<script type="text/javascript">
+	// $('#login').click(function(evt){
+	// 	evt.preventDefault();
+
+	// 	$.ajax({
+	// 		url: '/login',
+	// 		type: 'POST',
+	// 		data: {
+	// 			name: $('#name').val(),
+	// 			password: $('#password').val()
+	// 		},
+	// 		success: function(data){
+	// 			if(data.ret_code === 0){
+	// 				location.reload();
+	// 			}	
+	// 		}
+	// 	});
+	// });
+</script>
+
+</body>
+</html>

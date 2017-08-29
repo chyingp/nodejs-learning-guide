@@ -1,5 +1,34 @@
 ## 简介
 
+Diffie-Hellman（简称DH）是密钥交换算法之一，它的作用是保证通信双方在非安全的信道中安全地交换密钥。目前DH最重要的应用场景之一，就是在HTTPS的握手阶段，客户端、服务端利用DH算法交换对称密钥。
+
+下面会先简单介绍DH的数理基础，然后举例说明如何在nodejs中使用DH相关的API。
+
+## 数论基础
+
+要理解DH算法，需要掌握一定的数论基础。感兴趣的可以进一步研究推导过程，或者直接记住下面结论，然后进入下一节。
+
+1. 假设 Y = a^X mod p，已知X的情况下，很容易算出Y；已知道Y的情况下，很难算出X；
+2. (a^Xa mod p)^Xb mod p = a^(Xa * Xb) mod p
+
+## 握手步骤说明
+
+假设客户端、服务端挑选两个素数a、p（都公开），然后
+
+* 客户端：选择自然数Xa，Ya = a^Xa mod p，并将Ya发送给服务端；
+* 服务端：选择自然数Xb，Yb = a^Xb mod p，并将Yb发送给客户端；
+* 客户端：计算 Ka = Yb^Xa mod p
+* 服务端：计算 Kb = Ya^Xb mod p
+
+>Ka = Yb^Xa mod p 
+    = (a^Xb mod p)^Xa mod p 
+    = a^(Xb * Xa) mod p
+    = (a^Xa mod p)^Xb mod p
+    = Ya^Xb mod p
+    = Kb
+
+可以看到，尽管客户端、服务端彼此不知道对方的Xa、Xb，但算出了相等的secret。
+
 ## 代码示例
 
 ## 相关链接

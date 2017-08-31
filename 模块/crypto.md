@@ -404,3 +404,12 @@ https://zh.wikipedia.org/wiki/%E5%88%86%E7%BB%84%E5%AF%86%E7%A0%81%E5%B7%A5%E4%B
 
 为什么说密文链接模式已经丧失安全性？
 https://www.zhihu.com/question/26437065
+
+Elliptic Curve Cryptography: a gentle introduction
+http://andrea.corbellini.name/2015/05/17/elliptic-curve-cryptography-a-gentle-introduction/
+
+Elliptic Curve Cryptography: ECDH and ECDSA
+http://andrea.corbellini.name/2015/05/30/elliptic-curve-cryptography-ecdh-and-ecdsa/
+
+为什么RSA公钥每次加密得到的结果都不一样？
+http://blog.csdn.net/guyongqiangx/article/details/74930951

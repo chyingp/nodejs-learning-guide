@@ -3,7 +3,7 @@
 * [Introduction](README.md)
 * [内置模块](内置模块.md)
   * [资源压缩-zlib\(ok\)](模块/zlib.md)
-  * [文件系统操作-fs](文件系统操作-fs.md)
+  * [文件系统操作-fs](模块/fs.md)
   * [域名解析-dns\(ok\)](模块/dns.md)
   * [网络服务-http\(ok\)](模块/http.md)
   * [网络服务-http-req\(ok\)](模块/http.req.md)

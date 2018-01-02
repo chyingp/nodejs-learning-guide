@@ -48,7 +48,8 @@
   * [express+session实现简易身份认证(ok)](进阶/express+session实现简易身份认证.md)
   * [express+morgan：从入门使用到源码剖析(ok)](进阶/日志模块morgan.md)
   * [Nodejs 进阶：log4js入门实例(ok)](进阶/log4js.md)
-  * [调试日志打印：debug模块](/进阶/debug-log.md)  
+  * [调试日志打印：debug模块](/进阶/debug-log.md)
+  * [Nodejs进阶：crypto模块之理论篇](/进阶/crypto-theory.md)
   * express进阶：多模板引擎支持
   * 基于 express + XHR 的跨域资源请求
 

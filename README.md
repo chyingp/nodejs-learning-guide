@@ -58,5 +58,6 @@ Nodejs学习过程中的一些总结，可[点击这里](https://github.com/chyi
   * [Nodejs 进阶：log4js入门实例(ok)](进阶/log4js.md)
   * [调试日志打印：debug模块](/进阶/debug-log.md)
   * [Nodejs进阶：crypto模块之理论篇](/进阶/crypto-theory.md)
+  * [Nodejs进阶：5分钟入门非对称加密用法](/进阶/asymmetric-enc-dec.md)
   * express进阶：多模板引擎支持
   * 基于 express + XHR 的跨域资源请求

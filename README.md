@@ -20,14 +20,14 @@ Nodejs学习过程中的一些总结，可[点击这里](https://github.com/chyi
   * [网络服务-http-server\(ok\)](模块/http.server.md)
   * [网络服务-https(ok)](模块/https.md)
   * [网络TCP-net\(ok\)](模块/net.md)
-  * 网络UDP-dgram
+  * [网络UDP-dgram(ok)](模块/dgram.md)
   * [网络地址解析-url\(ok\)](模块/url.md)
-  * 数据加密-crypto
+  * [数据加密-crypto(OK)](模块/crypto.md)
   * [URL查询字符串-querystring\(ok\)](模块/querystring.md)
   * [二进制数据-buffer\(ok\)](模块/buffer.md)
   * [子进程-child\_process](模块/child_process.md)
   * [进程相关-process(ok)](模块/process.md)
-  * 集群-cluster
+  * [集群-cluster(ok)](模块/cluster.md)
   * [基础调试-console(ok)](模块/console.md)
   * [进阶调试-debugger(ok)](模块/debug.md)
   * 错误处理-error

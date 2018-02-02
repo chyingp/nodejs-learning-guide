@@ -115,6 +115,3 @@ server got message from: 192.168.0.102:61010
 ## 相关链接
 
 https://nodejs.org/api/dgram.html
-
-Node.js：dgram模块实现UDP通信
-http://www.cnblogs.com/zmxmumu/p/6222946.html

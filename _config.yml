@@ -3,7 +3,9 @@ description: Nodejs学习笔记
 google_analytics: 
 show_downloads: true
 theme: mmistakes/minimal-mistakes
-include: ["_pages"]
+include:
+  - .htaccess
+  - _pages
 
 gems:
   - jekyll-mentions

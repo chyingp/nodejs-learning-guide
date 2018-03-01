@@ -2,7 +2,7 @@ title: Nodejs学习笔记
 description: Nodejs学习笔记
 google_analytics: 
 show_downloads: true
-theme: mmistakes/minimal-mistakes
+theme: jekyll-theme-cayman
 include:
   - .htaccess
   - _pages

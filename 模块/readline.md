@@ -19,7 +19,7 @@ const rl = readline.createInterface({
 });
 
 rl.question('Please input a word: ', function(answer){
-    console.log('You have entered {%s}', answer.toUpperCase());
+    console.log('You have entered [%s]', answer.toUpperCase());
     rl.close();
 });
 ```

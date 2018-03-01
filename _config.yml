@@ -2,7 +2,8 @@ title: Nodejs学习笔记
 description: Nodejs学习笔记
 google_analytics: 
 show_downloads: true
-remote_theme: mmistakes/minimal-mistakes
+theme: mmistakes/minimal-mistakes
+include: ["_pages"]
 
 gems:
   - jekyll-mentions

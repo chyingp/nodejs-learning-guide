@@ -2,7 +2,7 @@ title: Nodejs学习笔记
 description: Nodejs学习笔记
 google_analytics: 
 show_downloads: true
-theme: jekyll-theme-cayman
+theme: jekyll-theme-tactile
 
 gems:
   - jekyll-mentions

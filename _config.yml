@@ -3,23 +3,6 @@ description: Nodejs学习笔记
 google_analytics: 
 show_downloads: true
 theme: jekyll-theme-cayman
-include:
-  - .htaccess
-  - _pages
 
 gems:
   - jekyll-mentions
-
-# Defaults
-defaults:
-  # _posts
-  - scope:
-      path: ""
-      type: posts
-    values:
-      layout: single
-      author_profile: true
-      read_time: true
-      comments: # true
-      share: true
-      related: true

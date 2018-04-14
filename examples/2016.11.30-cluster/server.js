@@ -8,6 +8,8 @@ if(cluster.isMaster){
 	}
 }else{
 	http.createServer(function(req, res){
-		res.end('ok');
+		res.end(`response from worker ${process.pid}`);
 	}).listen(3000);
+
+	console.log(`Worker ${process.pid} started`);
 }

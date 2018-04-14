@@ -33,9 +33,32 @@ if(cluster.isMaster){
   }
 }else{
   http.createServer(function(req, res){
-    res.end('ok');
+    res.end(`response from worker ${process.pid}`);
   }).listen(3000);
+
+  console.log(`Worker ${process.pid} started`);
 }
+```
+
+客户端发送请求：`./req.sh`
+
+```bash
+#!/bin/bash
+
+# req.sh
+for((i=1;i<=4;i++)); do   
+  curl http://127.0.0.1:3000
+  echo ""
+done 
+```
+
+输出如下：
+
+```bash
+response from worker 23735
+response from worker 23731
+response from worker 23729
+response from worker 23730
 ```
 
 ## 实现原理

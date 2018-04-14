@@ -59,7 +59,7 @@ process.argv.forEach(function(val, index, array) {
 });
 ```
 
-运行命令 `node argv.js --env production`，输出如下。
+运行命令 `NODE_ENV=dev node argv.js --env production`，输出如下。（不包含环境变量）
 
 ```bash
 参数0: /Users/a/.nvm/versions/node/v6.1.0/bin/node

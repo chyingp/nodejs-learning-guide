@@ -389,7 +389,7 @@ function masterInit() {
       process: workerProcess
     });
 
-    worker.on('message', function(message, handle) {
+    worker.on('message', function(message, handle) {      
       cluster.emit('message', this, message, handle);
     });
 
@@ -431,6 +431,13 @@ function masterInit() {
       cluster.emit('disconnect', worker);
     });
 
+    // 创建 worker，初始化 server实例，并调用 listen() 时
+    // worker 会通过 sendHelper() 抛出 internalMessage
+    // 
+    // message：{ cmd: 'NODE_CLUSTER', act: 'queryServer', seq: 0, cb: function () {} }
+    // 
+    // internal(worker, onmessage) 这层包装，使得 进程知会处理 cmd === 'NODE_CLUSTER' 的内部事件
+    // 注意：workerInit 里也有 onmessage 方法
     worker.process.on('internalMessage', internal(worker, onmessage));
     process.nextTick(emitForkNT, worker);
     cluster.workers[worker.id] = worker;
@@ -479,6 +486,7 @@ function masterInit() {
     if (message.act === 'online')
       online(worker);
     else if (message.act === 'queryServer')
+      // 调用 queryServer 方法
       queryServer(worker, message);
     else if (message.act === 'listening')
       listening(worker, message);
@@ -503,14 +511,24 @@ function masterInit() {
     // Stop processing if worker already disconnecting
     if (worker.exitedAfterDisconnect)
       return;
+
+/*
+    注意：在 cluster._getServer() 里有如下代码
+
+    const indexesKey = [ options.address,
+                         options.port,
+                         options.addressType,
+                         options.fd ].join(':');
+ */    
     var args = [message.address,
                 message.port,
                 message.addressType,
-                message.fd,
-                message.index];
-    var key = args.join(':');
+                message.fd, // undefined
+                message.index]; // 注意：对于同样的监听参数，index 是从0开始递增的整数
+    var key = args.join(':'); // 例子：':3000:4::0'
     var handle = handles[key];
     if (handle === undefined) {
+      // 默认情况下，net.Server().listen() => RoundRobinHandle
       var constructor = RoundRobinHandle;
       // UDP is exempt from round-robin connection balancing for what should
       // be obvious reasons: it's connectionless. There is nothing to send to
@@ -520,6 +538,9 @@ function masterInit() {
           message.addressType === 'udp6') {
         constructor = SharedHandle;
       }
+
+      // 创建新的handle，并挂载到 handles 上
+      // 这里的 constructor 为 RoundRobinHandle
       handles[key] = handle = new constructor(key,
                                               message.address,
                                               message.port,
@@ -598,7 +619,19 @@ function workerInit() {
     }
   };
 
+  // cluster._getServer仅在 worker 进程里可用
+  // obj：有可能是 net.Server 实例，或者 dgram.Server 实例
   // obj is a net#Server or a dgram#Socket object.
+  // 
+  // addressType：4、6（ipv4、ipv6）
+  // 
+  // 假设：require('net').createServer(fn).listen(3000)
+  // options.address：null
+  // options.port：3000
+  // options.addressType：4
+  // options.fd：undefined
+  // 
+  // indexesKey => ':3000:4:'
   cluster._getServer = function(obj, options, cb) {
     const indexesKey = [ options.address,
                          options.port,
@@ -609,6 +642,16 @@ function workerInit() {
     else
       indexes[indexesKey]++;
 
+    // message =>
+    // {
+    //   act: 'queryServer',
+    //   index: ':3000:4:',
+    //   data: null,
+    //   address: null,
+    //   port: 3000,
+    //   addressType: 4,
+    //   fd: undefined
+    // }
     const message = util._extend({
       act: 'queryServer',
       index: indexes[indexesKey],
@@ -617,6 +660,13 @@ function workerInit() {
 
     // Set custom data on handle (i.e. tls tickets key)
     if (obj._getServerData) message.data = obj._getServerData();
+
+    /*
+      send 方法的定义如下，注意：masterInit 里也有 send 方法
+      function send(message, cb) {
+        return sendHelper(process, message, null, cb);
+      }    
+     */    
     send(message, function(reply, handle) {
       if (obj._setServerData) obj._setServerData(reply.data);
 
@@ -625,6 +675,7 @@ function workerInit() {
       else
         rr(reply, indexesKey, cb);              // Round-robin.
     });
+
     obj.once('listening', function() {
       cluster.worker.state = 'listening';
       const address = obj.address();
@@ -732,6 +783,9 @@ function workerInit() {
   };
 
   function send(message, cb) {
+    // process：worker 进程
+    // message：{ act: 'queryServer' }
+    // cb：function(reply, handle) { }
     return sendHelper(process, message, null, cb);
   }
 
@@ -772,11 +826,19 @@ function workerInit() {
 
 var seq = 0;
 var callbacks = {};
+
+// worker queryServer 时，参数分别为：
+// proc：worker进程
+// message：{ act: 'queryServer' }
+// handle：null
+// cb：function(reply, handle) { }
 function sendHelper(proc, message, handle, cb) {
   if (!proc.connected)
     return false;
 
   // Mark message as internal. See INTERNAL_PREFIX in lib/child_process.js
+  // message => { cmd: 'NODE_CLUSTER', act: 'queryServer', seq: 0 }
+  // callbacks[0] => function(reply, handle) { }
   message = util._extend({ cmd: 'NODE_CLUSTER' }, message);
   if (cb) callbacks[seq] = cb;
   message.seq = seq;

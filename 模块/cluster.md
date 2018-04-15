@@ -593,10 +593,10 @@ cluster._getServer = function(obj, options, cb) {
 
 ```javascript
 // worker进程
-// Round-robin. Master distributes handles across workers.
 // message： {"cmd":"NODE_CLUSTER","sockname":{"address":"::","family":"IPv6","port":3000},"data":null,"ack":1,"key":":3000:4::0","errno":null,"seq":0}
 // indexsKey: ":3000:4:"
 // cb: _getServer 的回调
+// Round-robin. Master distributes handles across workers.
 function rr(message, indexesKey, cb) {
   if (message.errno)
     return cb(message.errno, null);
@@ -647,11 +647,209 @@ function rr(message, indexesKey, cb) {
   if (message.sockname) {
     handle.getsockname = getsockname;  // TCP handles only.
   }
-  assert(handles[key] === undefined);
+  
   handles[key] = handle;
-  cb(0, handle);
+  cb(0, handle); // 终于调用 cb 了。。。
 }
 ```
+
+然后，下面的回调函数被调用：
+
+```javascript
+// worker进程
+function cb(err, handle) {
+  // err：0
+  // handle: {close: fn, listen: fn, getsockname: fn, ref: fn, unref: fn}
+  if (err === 0 && port > 0 && handle.getsockname) {
+    var out = {};
+    err = handle.getsockname(out);
+    if (err === 0 && port !== out.port)
+      err = uv.UV_EADDRINUSE;
+  }
+
+  self._handle = handle; // 将 handle 赋给 net.Server 实例
+  self._listen2(address, port, addressType, backlog, fd); // 调用 _listen2 方法
+}
+```
+
+看下此时 _listen2 做了什么。主要是抛出 listening 事件，以及 添加 onconnection 监听。
+
+```javascript
+// worker进程
+Server.prototype._listen2 = function(address, port, addressType, backlog, fd) {
+
+  // If there is not yet a handle, we need to create one and bind.
+  // In the case of a server sent via IPC, we don't need to do this.
+  if (this._handle) {
+    debug('_listen2: have a handle already');
+  } 
+
+  this._handle.onconnection = onconnection; // onconnect 回调
+  this._handle.owner = this;
+
+  var err = _listen(this._handle, backlog);
+
+  // generate connection key, this should be unique to the connection
+  this._connectionKey = addressType + ':' + address + ':' + port;
+
+  process.nextTick(emitListeningNT, this);
+};
+```
+
+前面说过，在主进程里，创建了 net.Server 实例，并对端口进行实际的监听。再来回顾这段代码
+
+```javascript
+// master进程
+// Start a round-robin server. Master accepts connections and distributes
+// them over the workers.
+function RoundRobinHandle(key, address, port, addressType, fd) {
+  // 忽略非重点代码
+  this.server = net.createServer(assert.fail);
+  this.server.listen(port, address); // 注意这里的监听
+
+  this.server.once('listening', () => {
+    this.handle = this.server._handle;
+    this.handle.onconnection = (err, handle) => this.distribute(err, handle);
+    this.server._handle = null;
+    this.server = null;
+  });
+}
+```
+
+监听调用的是 net 模块中如下函数：
+
+```javascript
+// master进程
+self._listen2(address, port, addressType, backlog, fd);
+```
+
+```javascript
+// master进程
+Server.prototype._listen2 = function(address, port, addressType, backlog, fd) {
+
+  // If there is not yet a handle, we need to create one and bind.
+  // In the case of a server sent via IPC, we don't need to do this.
+  // 此时，this._handle 是 null（初始化状态），于是走第二个分支
+  if (this._handle) {
+    debug('_listen2: have a handle already');
+  } else {
+    debug('_listen2: create a handle');
+
+    var rval = null;
+
+    if (!address && typeof fd !== 'number') {
+      rval = createServerHandle('::', port, 6, fd);
+
+      if (typeof rval === 'number') {
+        rval = null;
+        address = '0.0.0.0';
+        addressType = 4;
+      } else {
+        address = '::';
+        addressType = 6;
+      }
+    }
+
+    // rval: {"reading":false,"owner":null,"onread":null,"onconnection":null,"writeQueueSize":0}
+    if (rval === null)
+      // 重点是这行代码，在这里面创建 TCP 实例，并进行监听
+      // fd: undefined
+      // address: ::''
+      rval = createServerHandle(address, port, addressType, fd);
+
+    if (typeof rval === 'number') {
+      var error = exceptionWithHostPort(rval, 'listen', address, port);
+      process.nextTick(emitErrorNT, this, error);
+      return;
+    }
+    this._handle = rval;
+  }
+
+  this._handle.onconnection = onconnection;
+  this._handle.owner = this;
+
+  var err = _listen(this._handle, backlog);
+
+  if (err) {
+    var ex = exceptionWithHostPort(err, 'listen', address, port);
+    this._handle.close();
+    this._handle = null;
+    process.nextTick(emitErrorNT, this, ex);
+    return;
+  }
+
+  // generate connection key, this should be unique to the connection
+  this._connectionKey = addressType + ':' + address + ':' + port;
+
+  // unref the handle if the server was unref'ed prior to listening
+  if (this._unref)
+    this.unref();
+
+  process.nextTick(emitListeningNT, this);
+};
+```
+
+主要逻辑：创建 TCP 实例，绑定端口、IP，并返回 handle。
+
+```javascript
+//master进程
+function createServerHandle(address, port, addressType, fd) {
+  var err = 0;
+  // assign handle in listen, and clean up if bind or listen fails
+  var handle;
+
+  var isTCP = false;
+  
+  handle = new TCP();
+  isTCP = true;
+
+  if (address || port || isTCP) {
+    debug('bind to ' + (address || 'anycast'));
+    if (!address) {
+      // Try binding to ipv6 first
+      err = handle.bind6('::', port);
+      if (err) {
+        handle.close();
+        // Fallback to ipv4
+        return createServerHandle('0.0.0.0', port);
+      }
+    } else if (addressType === 6) {
+      err = handle.bind6(address, port);
+    } else {
+      err = handle.bind(address, port);
+    }
+  }
+
+  if (err) {
+    handle.close();
+    return err;
+  }
+
+  return handle;
+}
+```
+
+server._handle 初始化完成，开始监听后，触发 listening 事件。此时，RoundRobinHandle 中的回调函数被调用。
+
+```javascript
+// master进程
+this.server.once('listening', () => {
+  // 将 this.server._handle 赋值给 this.handle
+  this.handle = this.server._handle;
+  // 覆盖 this.handle.onconnection，以达到请求分发的目的
+  this.handle.onconnection = (err, handle) => this.distribute(err, handle);
+  // 将server._handle 设置为null
+  this.server._handle = null;
+  // 将this.server 设置为null（这里只需要 handle 就够了）
+  this.server = null;
+});
+```
+
+经过上面的复杂流程，最终的结果是：
+
+1. master 进程中创建了 net.Server 实例A，并对来自特定端口的请求进行监听。
+2. worker 进程中创建了 net.Server 实例B。
+3. 当新连接创建时，实例A 将请求分发给实例B。（如果有多个worker进程，master进程会按照特定算法进行分发）
 
 ## 相关链接
 

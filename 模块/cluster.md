@@ -231,16 +231,430 @@ worker.process.on('internalMessage', internal(worker, onmessage));
                                               message.flags);
 ```
 
+## 备忘
+
+首先，master 进程 fork() 子进程：
+
+```javascript
+// master进程
+cluster.fork()
+```
+
+子进程创建 net.Server 实例：
+
+```javascript
+// worker进程
+require('net').createServer(() => {}).listen(3000);
+```
+
+在 net 模块中，调用 cluster._getServer 
+
+```javascript
+// worker进程
+cluster._getServer(self, {
+  address: address,
+  port: port,
+  addressType: addressType,
+  fd: fd,
+  flags: 0
+}, cb);
+
+function cb(err, handle) {
+  // 忽略错误处理
+  self._handle = handle;
+  self._listen2(address, port, addressType, backlog, fd);
+}
+```
+
+在 cluster._getServer 中，通过 process.send(message)，向 master 进程发送 queryServer 请求。
+
+```javascript
+// worker进程
+cluster._getServer = function(obj, options, cb) {
+    const indexesKey = [ options.address,
+                         options.port,
+                         options.addressType,
+                         options.fd ].join(':');
+    if (indexes[indexesKey] === undefined)
+      indexes[indexesKey] = 0;
+    else
+      indexes[indexesKey]++;
+
+    // message =>
+    // {
+    //   act: 'queryServer',
+    //   index: ':3000:4:',
+    //   data: null,
+    //   address: null,
+    //   port: 3000,
+    //   addressType: 4,
+    //   fd: undefined
+    // }
+    const message = util._extend({
+      act: 'queryServer',
+      index: indexes[indexesKey],
+      data: null
+    }, options);
+
+    // Set custom data on handle (i.e. tls tickets key)
+    if (obj._getServerData) message.data = obj._getServerData();
+
+    /*
+      send 方法的定义如下，注意：masterInit 里也有 send 方法
+      function send(message, cb) {
+        return sendHelper(process, message, null, cb);
+      }
+      在 sendHelper 里对 message 进程加工，最终 message 如下所示（关键字段）：
+      { cmd: 'NODE_CLUSTER', act: 'queryServer' }
+    */  
+    send(message, function(reply, handle) {
+      if (obj._setServerData) obj._setServerData(reply.data);
+
+      if (handle)
+        shared(reply, handle, indexesKey, cb);  // Shared listen socket.
+      else
+        rr(reply, indexesKey, cb);              // Round-robin.
+    });
+
+    obj.once('listening', function() {
+      cluster.worker.state = 'listening';
+      const address = obj.address();
+      message.act = 'listening';
+      message.port = address && address.port || options.port;
+      send(message);
+    });
+  };
+```
+
+在 cluster.fork() 方法里，监听了 internalMessage 事件，onmessage里，调用了 queryServer()。
+
+```javascript
+// master进程
+cluster.fork = function(env) {
+  // 忽略非关键代码
+  const workerProcess = createWorkerProcess(id, env);
+  const worker = new Worker({
+    id: id,
+    process: workerProcess
+  });
+  worker.process.on('internalMessage', internal(worker, onmessage));
+};
+
+// 
+function onmessage(message, handle) {
+  var worker = this;
+  if (message.act === 'online')
+    online(worker);
+  else if (message.act === 'queryServer')
+    // 调用 queryServer 方法
+    queryServer(worker, message);
+  else if (message.act === 'listening')
+    listening(worker, message);
+  else if (message.act === 'exitedAfterDisconnect')
+    exitedAfterDisconnect(worker, message);
+  else if (message.act === 'close')
+    close(worker, message);
+}
+```
+
+在 queryServer 里，首先 创建 RoundRobinHandle 实例，然后调用 handle.add()。
+
+对于 address + port + addressType + fd + index 一样的 net.Server 实例，只创建一个 RoundRobinHandle 实例，并通过 handle.add() 将worker添加进去。
+
+```javascript
+// master进程
+function queryServer(worker, message) {  
+    var args = [message.address,
+                message.port,
+                message.addressType,
+                message.fd, // undefined
+                message.index]; // 注意：对于同样的监听参数，index 是从0开始递增的整数
+    var key = args.join(':'); // 例子：':3000:4::0'
+    var handle = handles[key];
+    if (handle === undefined) {      
+      var constructor = RoundRobinHandle;
+
+      // 创建新的handle，并挂载到 handles 上
+      // 这里的 constructor 为 RoundRobinHandle
+      handles[key] = handle = new constructor(key,
+                                              message.address,
+                                              message.port,
+                                              message.addressType,
+                                              message.fd,
+                                              message.flags);
+    }
+    if (!handle.data) handle.data = message.data;
+
+    // Set custom server data
+    handle.add(worker, function(errno, reply, handle) {
+      reply = util._extend({
+        errno: errno,
+        key: key,
+        ack: message.seq,
+        data: handles[key].data
+      }, reply);
+      if (errno) delete handles[key];  // Gives other workers a chance to retry.
+      send(worker, reply, handle);
+    });
+  }
+```
+
+看下 RoundRobinHandle 的构造方法。创建了 net.Server 实例，并调用 server.listen() 方法（实际监听）。
+
+当 listening 事件触发，将 onconnection 事件覆盖掉，实现在多个worker中分发请求的逻辑。
+
+```javascript
+// master进程
+function RoundRobinHandle(key, address, port, addressType, fd) {
+  this.key = key;
+  this.all = {};
+  this.free = [];
+  this.handles = [];
+  this.handle = null;
+  this.server = net.createServer(assert.fail);
+
+  if (fd >= 0)
+    this.server.listen({ fd: fd });
+  else if (port >= 0)
+    this.server.listen(port, address);
+  else
+    this.server.listen(address);  // UNIX socket path.
+
+  this.server.once('listening', () => {
+    this.handle = this.server._handle;
+    // 监听 connection 事件，当用户请求进来时，通过 this.distribute() 分发请求到各个worker
+    this.handle.onconnection = (err, handle) => this.distribute(err, handle);
+    this.server._handle = null;
+    this.server = null;
+  });
+}
+```
+
+注意，前面调用了 handle.add() 方法，如下所示
+
+```javascript
+// master进程
+// Set custom server data
+handle.add(worker, function(errno, reply, handle) {
+  reply = util._extend({
+    errno: errno,
+    key: key,
+    ack: message.seq,
+    data: handles[key].data
+  }, reply);
+  if (errno) delete handles[key];  // Gives other workers a chance to retry.
+  send(worker, reply, handle);
+});
+```
+
+看下方法定义（忽略非主要逻辑）：
+
+```javascript
+// master进程
+RoundRobinHandle.prototype.add = function(worker, send) {
+  // 存储worker的引用
+  this.all[worker.id] = worker;
+
+  // 当listening事件触发，done 被调用（注意，在 RoundRobinHandle 构造方法里也监听了 listening）
+  const done = () => {
+    if (this.handle.getsockname) {
+      // osx 10.13.1，node 8.9.3，跑这个分支
+      var out = {};
+      this.handle.getsockname(out);
+      // 这里的 send 函数名比较有歧义，其实是 handle.add(worker, callback) 中的 callback
+      // TODO(bnoordhuis) Check err.
+      send(null, { sockname: out }, null);
+    } else {
+      send(null, null, null);  // UNIX socket.
+    }
+    this.handoff(worker);  // In case there are connections pending.
+  };
+
+  // Still busy binding.
+  this.server.once('listening', done);
+};
+```
+
+当 listening 事件触发，下面方法被调用。同样的，最终被 sendHelper 封装了一遍
+
+```javascript
+// master进程
+// error: null
+// reply: {}
+// handle: null 
+function(errno, reply, handle) {
+  reply = util._extend({
+    errno: errno,
+    key: key,
+    ack: message.seq,
+    data: handles[key].data
+  }, reply);
+  if (errno) delete handles[key];  // Gives other workers a chance to retry.
+  {"errno":null,"key":":3000:4::0","ack":1,"data":null,"sockname":{"address":"::","family":"IPv6","port":3000}}
+  send(worker, reply, handle);
+}
+```
+
+经过 sendHelper 的封装，worker.process.send(message)，message 内容如下。注意，此时 ack === 1。
+
+```javascript
+// master进程
+{
+  "cmd": "NODE_CLUSTER",
+  "sockname": {
+    "address": "::",
+    "family": "IPv6",
+    "port": 3000
+  },
+  "data": null,
+  "ack": 1,
+  "key": ":3000:4::0",
+  "errno": null,
+  "seq": 0
+}
+```
+
+当上面 message 被发出时，worker 进程的 internalMessage 事件触发。（worker进程 的internalMessage 事件是在 node_bootstrap阶段监听的，这里容易忽略）
+
+```javascript
+// worker进程
+cluster._setupWorker = function() {
+  var worker = new Worker({
+    id: +process.env.NODE_UNIQUE_ID | 0,
+    process: process,
+    state: 'online'
+  });
+  cluster.worker = worker;
+  process.on('internalMessage', internal(worker, onmessage));
+};
+```
+
+如下所示，当 message.ack 存在时，callbacks[message.ack] 被调用。
+
+```javascript
+// worker进程
+function internal(worker, cb) {
+  return function(message, handle) {
+    if (message.cmd !== 'NODE_CLUSTER') return;
+    var fn = cb;
+    // 此时，message.ack === 1
+    // callbacks[message.ack] 是 _getServer 的回调
+    if (message.ack !== undefined && callbacks[message.ack] !== undefined) {
+      fn = callbacks[message.ack];
+      delete callbacks[message.ack];
+    }
+    fn.apply(worker, arguments);
+  };
+}
+```
+
+也就是下面的回调。
+
+```javascript
+// worker进程
+// obj is a net#Server or a dgram#Socket object.
+cluster._getServer = function(obj, options, cb) {
+
+  // 忽略部分代码
+  const message = util._extend({
+    act: 'queryServer',
+    index: indexes[indexesKey],
+    data: null
+  }, options);
+
+  /* 
+  注意：就是这里的回调】
+  reply: {
+    "cmd": "NODE_CLUSTER",
+    "sockname": {
+      "address": "::",
+      "family": "IPv6",
+      "port": 3000
+    },
+    "data": null,
+    "ack": 1,
+    "key": ":3000:4::0",
+    "errno": null,
+    "seq": 0
+  }
+  handle：undefined
+  */
+  send(message, (reply, handle) => {
+    if (handle)
+      shared(reply, handle, indexesKey, cb);  // Shared listen socket.
+    else
+      // 这里被调用
+      rr(reply, indexesKey, cb);              // Round-robin.
+  });
+};
+```
+
+下面是 rr 方法的定义。
+
+```javascript
+// worker进程
+// Round-robin. Master distributes handles across workers.
+// message： {"cmd":"NODE_CLUSTER","sockname":{"address":"::","family":"IPv6","port":3000},"data":null,"ack":1,"key":":3000:4::0","errno":null,"seq":0}
+// indexsKey: ":3000:4:"
+// cb: _getServer 的回调
+function rr(message, indexesKey, cb) {
+  if (message.errno)
+    return cb(message.errno, null);
+
+  var key = message.key;
+  function listen(backlog) {
+    // TODO(bnoordhuis) Send a message to the master that tells it to
+    // update the backlog size. The actual backlog should probably be
+    // the largest requested size by any worker.
+    return 0;
+  }
+
+  function close() {
+    // lib/net.js treats server._handle.close() as effectively synchronous.
+    // That means there is a time window between the call to close() and
+    // the ack by the master process in which we can still receive handles.
+    // onconnection() below handles that by sending those handles back to
+    // the master.
+    if (key === undefined) return;
+    send({ act: 'close', key: key });
+    delete handles[key];
+    delete indexes[indexesKey];
+    key = undefined;
+  }
+
+  function getsockname(out) {
+    if (key) util._extend(out, message.sockname);
+    return 0;
+  }
+
+  // XXX(bnoordhuis) Probably no point in implementing ref() and unref()
+  // because the control channel is going to keep the worker alive anyway.
+  function ref() {
+  }
+
+  function unref() {
+  }
+
+  // Faux handle. Mimics a TCPWrap with just enough fidelity to get away
+  // with it. Fools net.Server into thinking that it's backed by a real
+  // handle.
+  var handle = {
+    close: close,
+    listen: listen,
+    ref: ref,
+    unref: unref,
+  };
+  if (message.sockname) {
+    handle.getsockname = getsockname;  // TCP handles only.
+  }
+  assert(handles[key] === undefined);
+  handles[key] = handle;
+  cb(0, handle);
+}
+```
+
 ## 相关链接
 
 官方文档：https://nodejs.org/api/cluster.html
 
 [How Node.js Multiprocess Load Balancing Works](http://onlinevillage.blogspot.com/2011/11/how-nodejs-multiprocess-load-balancing.html)
-
-
-## 备注
-
->The cluster module allows you to easily create child processes that all share server ports.
-
->Please note that on Windows, it is not yet possible to set up a named pipe server in a worker.
-

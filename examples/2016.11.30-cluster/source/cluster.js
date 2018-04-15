@@ -141,11 +141,13 @@ RoundRobinHandle.prototype.add = function(worker, send) {
   assert(worker.id in this.all === false);
   this.all[worker.id] = worker;
 
+  // 当listening事件触发，done 被调用（注意，在 RoundRobinHandle 构造方法里也监听了 listening）
   const done = () => {
     if (this.handle.getsockname) {
       var out = {};
       this.handle.getsockname(out);
       // TODO(bnoordhuis) Check err.
+      // 这里的 send 函数名比较有歧义，其实是 handle.add(worker, callback) 中的 callback
       send(null, { sockname: out }, null);
     } else {
       send(null, null, null);  // UNIX socket.
@@ -552,6 +554,9 @@ function masterInit() {
 
     // Set custom server data
     handle.add(worker, function(errno, reply, handle) {
+      // errno: null
+      // reply: {"sockname":{"address":"::","family":"IPv6","port":3000}}
+      // handle: null
       reply = util._extend({
         errno: errno,
         key: key,

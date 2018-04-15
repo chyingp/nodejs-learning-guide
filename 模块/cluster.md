@@ -851,6 +851,71 @@ this.server.once('listening', () => {
 2. worker 进程中创建了 net.Server 实例B。
 3. 当新连接创建时，实例A 将请求分发给实例B。（如果有多个worker进程，master进程会按照特定算法进行分发）
 
+## 请求分发
+
+首先，对于每个在worker进程中创建的 net.Server实例，RoundRobinHandle.prototype.handoff(worker) 都会被调用。调用的实机是：master进程中创建的 net.Server实例 的 listening 事件触发时。如果该事件已经触发过，则handoff直接被调用。
+
+```javascript
+// master进程
+this.handoff(worker);
+```
+
+首先，当连接请求进来时，调用 this.distribute(err, handle);
+
+```javascript
+// master进程
+this.handle.onconnection = (err, handle) => this.distribute(err, handle);
+```
+
+看下distribute的实现。主要做了两件事情：
+
+1. 将 handle 加入待处理队列。
+2. 取得第一个空闲的worker，如果存在，就调用 this.handoff(worker); 处理请求。
+
+```javascript
+// master进程
+RoundRobinHandle.prototype.distribute = function(err, handle) {
+  // 将 handle 加入 handles 队列，该队列里是待处理的请求对应的handle。
+  this.handles.push(handle);
+  // 取第一个空闲的worker
+  var worker = this.free.shift();
+  // 如果有空闲的worker
+  if (worker) this.handoff(worker);
+};
+```
+
+看下 handoff(worker) 的实现。
+
+```javascript
+// master进程
+RoundRobinHandle.prototype.handoff = function(worker) {
+  if (worker.id in this.all === false) {
+    return;  // Worker is closing (or has closed) the server.
+  }
+  // 获取第一个待处理的请求
+  var handle = this.handles.shift();
+  if (handle === undefined) {
+    this.free.push(worker);  // Add to ready queue again.
+    return;
+  }
+  var message = { act: 'newconn', key: this.key };
+
+  // 向worker进程发送消息
+  // message：{ act: 'newconn', key: this.key }
+  sendHelper(worker.process, message, handle, (reply) => {
+    // 当 worker进程 收到消息后，ack回应，调用 handle.close() 
+    if (reply.accepted)
+      handle.close();
+    else
+      this.distribute(0, handle);  // Worker is shutting down. Send to another.
+    // 再次调用 handoff(worker)。有可能前面已经有一堆的待处理请求，因此检查下还有没有请求需要处理
+    // 如有，已经空闲出来的worker可以接着处理请求
+    this.handoff(worker);
+  });
+};
+```
+
+
 ## 相关链接
 
 官方文档：https://nodejs.org/api/cluster.html

@@ -1,10 +1,10 @@
 ## cluster模块概览
 
-node实例是单线程作业的，因此，在服务端编程中，通常会创建多个node实例来处理客户端的请求，以此降低CPU的负载。对这样多个服务端node实例，我们称之为cluster（集群）。
+node实例是单线程作业的。在服务端编程中，通常会创建多个node实例来处理客户端的请求，以此提升系统的吞吐率。对这样多个node实例，我们称之为cluster（集群）。
+
+借助node的cluster模块，开发者可以在几乎不修改原有项目代码的前提下，获得集群服务带来的好处。
 
 集群有以下两种常见的实现方案，而node自带的cluster模块，采用了方案二。
-
-借助cluster模块，我们可以在几乎不修改原有项目的代码的前提下，获得集群服务带来的好处。
 
 ### 方案一：多个node实例+多个端口
 
@@ -68,853 +68,79 @@ response from worker 23730
 
 ## cluster模块实现原理
 
-主要搞清楚三个问题：
+了解cluster模块，主要搞清楚3个问题：
 
-1. 多个server实例，如何实现端口共享？
-2. 多个server实例子，来自客户端的请求如何分发到多个worker？
+1. master、worker如何通信？
+2. 多个server实例，如何实现端口共享？
+2. 多个server实例，来自客户端的请求如何分发到多个worker？
 
+下面会结合示意图进行介绍，源码级别的介绍，可以参考 [笔者的github](https://github.com/chyingp/nodejs-learning-guide)。
 
-### 问题1：如何同时创建多个server实例
+## 问题1：master、worker如何通信
 
-这个问题比较简单，cluster模块通过`cluster.fork()`方法创建多个进程实例，而`cluster.fork()`内部又是通过`child_process.fork()`来创建子进程的。
+这个问题比较简单。master进程通过 cluster.fork() 来创建 worker进程。cluster.fork() 内部 是通过 child_process.fork() 来创建子进程。
 
->cluster.fork() --> child_process.for()
+也就是说：
 
-如果需要传递环境变量，可以加上参数env，`cluster.fork(env)`。
+1. master进程、worker进程是父、子进程的关系。
+2. master进程、woker进程可以通过IPC通道进行通信。（重要）
 
-此外，子进程跟父进程之间可以通过IPC通道进行进程间通信，下文会举简单的例子进行说明
+## 问题2：如何实现端口共享
 
-### 问题2：cluster的负载均衡策略
+在前面的例子中，多个woker中创建的server监听了同个端口3000。通常来说，多个进程监听同个端口，系统会报错。
 
-cluster默认支持两种负载均衡策略，最常见的是第一种轮询。（round-robin，除了windows外的其他平台，默认都是这种）
+为什么我们的例子没问题呢？
 
-主进程监听特定端口，收到请求后，依次将请求派送给worker。
+秘密在于，net模块中，对 listen() 方法进行了特殊处理。根据当前进程是master进程，还是worker进程：
 
-### 问题3：如何实现端口共享
+1. master进程：在该端口上正常监听请求。（没做特殊处理）
+2. worker进程：创建server实例。然后通过IPC通道，向master进程发送消息，让master进程也创建 server 实例，并在该端口上监听请求。当请求进来时，master进程将请求转发给worker进程的server实例。
 
-对大部分初学者来说，这点是比较令人困惑的。根据经验来说，几个进程，同时监听同一个端口，系统会报错。那么，cluster是如何实现几个进程共享一个端口的呢？
+归纳起来，就是：master进程监听特定端口，并将客户请求转发给worker进程。
 
-看了cluster的源码后，发现实现思路很简单。net模块内部，判断当前进程是master进程，还是worker进程。
+如下图所示：
 
-* master进程：不做特殊处理。
-* worker进程：通过`cluster._getServer`来创建server。端口共享的秘密就在这里面了。
+![](https://www.chyingp.com/wp-content/uploads/2018/04/4c1692183865cb201df83f8ee357d070.png)
 
-假设有workerA、workerB，同时监听端口`port`
+### 问题3：如何将请求分发到多个worker
 
-```js
-  if (cluster.isMaster || exclusive) {
-    self._listen2(address, port, addressType, backlog, fd);
-    return;
-  }
+每当worker进程创建server实例来监听请求，都会通过IPC通道，在master上进行注册。当客户端请求到达，master会负责将请求转发给对应的worker。
 
-  cluster._getServer(self, {
-    address: address,
-    port: port,
-    addressType: addressType,
-    fd: fd,
-    flags: 0
-  }, cb);
-```
+具体转发给哪个worker？这是由转发策略决定的。可以通过环境变量NODE_CLUSTER_SCHED_POLICY设置，也可以在cluster.setupMaster(options)时传入。
 
-在master进程里，通过 cluster.fork() 创建子进程。
+默认的转发策略是轮询（SCHED_RR）。
 
-cluster.fork() 内部调用了 child_process.fork() 来创建子进程。该进程监听 internalMessage
+当有客户请求到达，master会轮询一遍worker列表，找到第一个空闲的worker，然后将该请求转发给该worker。
 
-```js
-worker.process.on('internalMessage', internal(worker, onmessage));
-```
+## master、worker内部通信小技巧
 
-看下子进程，比如创建了server，并监听port。当调用 server.listen(port)时，由于 cluster.isMaster 为false，所以运行的是第二段代码
+在开发过程中，我们会通过 process.on('message', fn) 来实现进程间通信。
 
-```js
-  if (cluster.isMaster || exclusive) {
-    self._listen2(address, port, addressType, backlog, fd);
-    return;
-  }
+前面提到，master进程、worker进程在server实例的创建过程中，也是通过IPC通道进行通信的。那会不会对我们的开发造成干扰呢？比如，收到一堆其实并不需要关心的消息？
 
-  // 子进程中，运行的是这段代码
-  cluster._getServer(self, {
-    address: address,
-    port: port,
-    addressType: addressType,
-    fd: fd,
-    flags: 0
-  }, cb);
-```
+答案肯定是不会？那么是怎么做到的呢？
 
-看下 cluster._getServer() 的实现。
+当发送的消息包含`cmd`字段，且改字段以`NODE_`作为前缀，则该消息会被视为内部保留的消息，不会通过`message`事件抛出，但可以通过监听'internalMessage'捕获。
 
-```js
-  // obj is a net#Server or a dgram#Socket object.
-  cluster._getServer = function(obj, options, cb) {
-    const indexesKey = [ options.address,
-                         options.port,
-                         options.addressType,
-                         options.fd ].join(':');
-    if (indexes[indexesKey] === undefined)
-      indexes[indexesKey] = 0;
-    else
-      indexes[indexesKey]++;
-
-    const message = util._extend({
-      act: 'queryServer',
-      index: indexes[indexesKey],
-      data: null
-    }, options);
-
-    // Set custom data on handle (i.e. tls tickets key)
-    if (obj._getServerData) message.data = obj._getServerData();
-    send(message, function(reply, handle) {
-      if (obj._setServerData) obj._setServerData(reply.data);
-
-      if (handle)
-        shared(reply, handle, indexesKey, cb);  // Shared listen socket.
-      else
-        rr(reply, indexesKey, cb);              // Round-robin.
-    });
-    obj.once('listening', function() {
-      cluster.worker.state = 'listening';
-      const address = obj.address();
-      message.act = 'listening';
-      message.port = address && address.port || options.port;
-      send(message);
-    });
-  };
-```
-
-
-```js
-    handle.add(worker, function(errno, reply, handle) {
-      reply = util._extend({
-        errno: errno,
-        key: key,
-        ack: message.seq,
-        data: handles[key].data
-      }, reply);
-      if (errno) delete handles[key];  // Gives other workers a chance to retry.
-      send(worker, reply, handle);
-    });
-```
-
-## 代码备忘
-
-```js
-    const message = util._extend({
-      act: 'queryServer',
-      index: indexes[indexesKey],
-      data: null
-    }, options);
-```
-
-
-```js
-    send(message, function(reply, handle) {
-      if (obj._setServerData) obj._setServerData(reply.data);
-
-      if (handle)
-        shared(reply, handle, indexesKey, cb);  // Shared listen socket.
-      else
-        rr(reply, indexesKey, cb);              // Round-robin.
-    });
-```
-
-
-```js
-
-  function send(message, cb) {
-    return sendHelper(process, message, null, cb);
-  }
-```
-
-```js
-      handles[key] = handle = new constructor(key,
-                                              message.address,
-                                              message.port,
-                                              message.addressType,
-                                              message.fd,
-                                              message.flags);
-```
-
-## 备忘
-
-首先，master 进程 fork() 子进程：
+以worker进程通知master进程创建server实例为例子。worker伪代码如下：
 
 ```javascript
-// master进程
-cluster.fork()
-```
-
-子进程创建 net.Server 实例：
-
-```javascript
-// worker进程
-require('net').createServer(() => {}).listen(3000);
-```
-
-在 net 模块中，调用 cluster._getServer 
-
-```javascript
-// worker进程
-cluster._getServer(self, {
-  address: address,
-  port: port,
-  addressType: addressType,
-  fd: fd,
-  flags: 0
-}, cb);
-
-function cb(err, handle) {
-  // 忽略错误处理
-  self._handle = handle;
-  self._listen2(address, port, addressType, backlog, fd);
-}
-```
-
-在 cluster._getServer 中，通过 process.send(message)，向 master 进程发送 queryServer 请求。
-
-```javascript
-// worker进程
-cluster._getServer = function(obj, options, cb) {
-    const indexesKey = [ options.address,
-                         options.port,
-                         options.addressType,
-                         options.fd ].join(':');
-    if (indexes[indexesKey] === undefined)
-      indexes[indexesKey] = 0;
-    else
-      indexes[indexesKey]++;
-
-    // message =>
-    // {
-    //   act: 'queryServer',
-    //   index: ':3000:4:',
-    //   data: null,
-    //   address: null,
-    //   port: 3000,
-    //   addressType: 4,
-    //   fd: undefined
-    // }
-    const message = util._extend({
-      act: 'queryServer',
-      index: indexes[indexesKey],
-      data: null
-    }, options);
-
-    // Set custom data on handle (i.e. tls tickets key)
-    if (obj._getServerData) message.data = obj._getServerData();
-
-    /*
-      send 方法的定义如下，注意：masterInit 里也有 send 方法
-      function send(message, cb) {
-        return sendHelper(process, message, null, cb);
-      }
-      在 sendHelper 里对 message 进程加工，最终 message 如下所示（关键字段）：
-      { cmd: 'NODE_CLUSTER', act: 'queryServer' }
-    */  
-    send(message, function(reply, handle) {
-      if (obj._setServerData) obj._setServerData(reply.data);
-
-      if (handle)
-        shared(reply, handle, indexesKey, cb);  // Shared listen socket.
-      else
-        rr(reply, indexesKey, cb);              // Round-robin.
-    });
-
-    obj.once('listening', function() {
-      cluster.worker.state = 'listening';
-      const address = obj.address();
-      message.act = 'listening';
-      message.port = address && address.port || options.port;
-      send(message);
-    });
-  };
-```
-
-在 cluster.fork() 方法里，监听了 internalMessage 事件，onmessage里，调用了 queryServer()。
-
-```javascript
-// master进程
-cluster.fork = function(env) {
-  // 忽略非关键代码
-  const workerProcess = createWorkerProcess(id, env);
-  const worker = new Worker({
-    id: id,
-    process: workerProcess
-  });
-  worker.process.on('internalMessage', internal(worker, onmessage));
+// woker进程
+const message = {
+  cmd: 'NODE_CLUSTER',
+  act: 'queryServer'
 };
-
-// 
-function onmessage(message, handle) {
-  var worker = this;
-  if (message.act === 'online')
-    online(worker);
-  else if (message.act === 'queryServer')
-    // 调用 queryServer 方法
-    queryServer(worker, message);
-  else if (message.act === 'listening')
-    listening(worker, message);
-  else if (message.act === 'exitedAfterDisconnect')
-    exitedAfterDisconnect(worker, message);
-  else if (message.act === 'close')
-    close(worker, message);
-}
+process.send(message);
 ```
 
-在 queryServer 里，首先 创建 RoundRobinHandle 实例，然后调用 handle.add()。
-
-对于 address + port + addressType + fd + index 一样的 net.Server 实例，只创建一个 RoundRobinHandle 实例，并通过 handle.add() 将worker添加进去。
+master伪代码如下：
 
 ```javascript
-// master进程
-function queryServer(worker, message) {  
-    var args = [message.address,
-                message.port,
-                message.addressType,
-                message.fd, // undefined
-                message.index]; // 注意：对于同样的监听参数，index 是从0开始递增的整数
-    var key = args.join(':'); // 例子：':3000:4::0'
-    var handle = handles[key];
-    if (handle === undefined) {      
-      var constructor = RoundRobinHandle;
-
-      // 创建新的handle，并挂载到 handles 上
-      // 这里的 constructor 为 RoundRobinHandle
-      handles[key] = handle = new constructor(key,
-                                              message.address,
-                                              message.port,
-                                              message.addressType,
-                                              message.fd,
-                                              message.flags);
-    }
-    if (!handle.data) handle.data = message.data;
-
-    // Set custom server data
-    handle.add(worker, function(errno, reply, handle) {
-      reply = util._extend({
-        errno: errno,
-        key: key,
-        ack: message.seq,
-        data: handles[key].data
-      }, reply);
-      if (errno) delete handles[key];  // Gives other workers a chance to retry.
-      send(worker, reply, handle);
-    });
-  }
+worker.process.on('internalMessage', fn);
 ```
-
-看下 RoundRobinHandle 的构造方法。创建了 net.Server 实例，并调用 server.listen() 方法（实际监听）。
-
-当 listening 事件触发，将 onconnection 事件覆盖掉，实现在多个worker中分发请求的逻辑。
-
-```javascript
-// master进程
-function RoundRobinHandle(key, address, port, addressType, fd) {
-  this.key = key;
-  this.all = {};
-  this.free = [];
-  this.handles = [];
-  this.handle = null;
-  this.server = net.createServer(assert.fail);
-
-  if (fd >= 0)
-    this.server.listen({ fd: fd });
-  else if (port >= 0)
-    this.server.listen(port, address);
-  else
-    this.server.listen(address);  // UNIX socket path.
-
-  this.server.once('listening', () => {
-    this.handle = this.server._handle;
-    // 监听 connection 事件，当用户请求进来时，通过 this.distribute() 分发请求到各个worker
-    this.handle.onconnection = (err, handle) => this.distribute(err, handle);
-    this.server._handle = null;
-    this.server = null;
-  });
-}
-```
-
-注意，前面调用了 handle.add() 方法，如下所示
-
-```javascript
-// master进程
-// Set custom server data
-handle.add(worker, function(errno, reply, handle) {
-  reply = util._extend({
-    errno: errno,
-    key: key,
-    ack: message.seq,
-    data: handles[key].data
-  }, reply);
-  if (errno) delete handles[key];  // Gives other workers a chance to retry.
-  send(worker, reply, handle);
-});
-```
-
-看下方法定义（忽略非主要逻辑）：
-
-```javascript
-// master进程
-RoundRobinHandle.prototype.add = function(worker, send) {
-  // 存储worker的引用
-  this.all[worker.id] = worker;
-
-  // 当listening事件触发，done 被调用（注意，在 RoundRobinHandle 构造方法里也监听了 listening）
-  const done = () => {
-    if (this.handle.getsockname) {
-      // osx 10.13.1，node 8.9.3，跑这个分支
-      var out = {};
-      this.handle.getsockname(out);
-      // 这里的 send 函数名比较有歧义，其实是 handle.add(worker, callback) 中的 callback
-      // TODO(bnoordhuis) Check err.
-      send(null, { sockname: out }, null);
-    } else {
-      send(null, null, null);  // UNIX socket.
-    }
-    this.handoff(worker);  // In case there are connections pending.
-  };
-
-  // Still busy binding.
-  this.server.once('listening', done);
-};
-```
-
-当 listening 事件触发，下面方法被调用。同样的，最终被 sendHelper 封装了一遍
-
-```javascript
-// master进程
-// error: null
-// reply: {}
-// handle: null 
-function(errno, reply, handle) {
-  reply = util._extend({
-    errno: errno,
-    key: key,
-    ack: message.seq,
-    data: handles[key].data
-  }, reply);
-  if (errno) delete handles[key];  // Gives other workers a chance to retry.
-  {"errno":null,"key":":3000:4::0","ack":1,"data":null,"sockname":{"address":"::","family":"IPv6","port":3000}}
-  send(worker, reply, handle);
-}
-```
-
-经过 sendHelper 的封装，worker.process.send(message)，message 内容如下。注意，此时 ack === 1。
-
-```javascript
-// master进程
-{
-  "cmd": "NODE_CLUSTER",
-  "sockname": {
-    "address": "::",
-    "family": "IPv6",
-    "port": 3000
-  },
-  "data": null,
-  "ack": 1,
-  "key": ":3000:4::0",
-  "errno": null,
-  "seq": 0
-}
-```
-
-当上面 message 被发出时，worker 进程的 internalMessage 事件触发。（worker进程 的internalMessage 事件是在 node_bootstrap阶段监听的，这里容易忽略）
-
-```javascript
-// worker进程
-cluster._setupWorker = function() {
-  var worker = new Worker({
-    id: +process.env.NODE_UNIQUE_ID | 0,
-    process: process,
-    state: 'online'
-  });
-  cluster.worker = worker;
-  process.on('internalMessage', internal(worker, onmessage));
-};
-```
-
-如下所示，当 message.ack 存在时，callbacks[message.ack] 被调用。
-
-```javascript
-// worker进程
-function internal(worker, cb) {
-  return function(message, handle) {
-    if (message.cmd !== 'NODE_CLUSTER') return;
-    var fn = cb;
-    // 此时，message.ack === 1
-    // callbacks[message.ack] 是 _getServer 的回调
-    if (message.ack !== undefined && callbacks[message.ack] !== undefined) {
-      fn = callbacks[message.ack];
-      delete callbacks[message.ack];
-    }
-    fn.apply(worker, arguments);
-  };
-}
-```
-
-也就是下面的回调。
-
-```javascript
-// worker进程
-// obj is a net#Server or a dgram#Socket object.
-cluster._getServer = function(obj, options, cb) {
-
-  // 忽略部分代码
-  const message = util._extend({
-    act: 'queryServer',
-    index: indexes[indexesKey],
-    data: null
-  }, options);
-
-  /* 
-  注意：就是这里的回调】
-  reply: {
-    "cmd": "NODE_CLUSTER",
-    "sockname": {
-      "address": "::",
-      "family": "IPv6",
-      "port": 3000
-    },
-    "data": null,
-    "ack": 1,
-    "key": ":3000:4::0",
-    "errno": null,
-    "seq": 0
-  }
-  handle：undefined
-  */
-  send(message, (reply, handle) => {
-    if (handle)
-      shared(reply, handle, indexesKey, cb);  // Shared listen socket.
-    else
-      // 这里被调用
-      rr(reply, indexesKey, cb);              // Round-robin.
-  });
-};
-```
-
-下面是 rr 方法的定义。
-
-```javascript
-// worker进程
-// message： {"cmd":"NODE_CLUSTER","sockname":{"address":"::","family":"IPv6","port":3000},"data":null,"ack":1,"key":":3000:4::0","errno":null,"seq":0}
-// indexsKey: ":3000:4:"
-// cb: _getServer 的回调
-// Round-robin. Master distributes handles across workers.
-function rr(message, indexesKey, cb) {
-  if (message.errno)
-    return cb(message.errno, null);
-
-  var key = message.key;
-  function listen(backlog) {
-    // TODO(bnoordhuis) Send a message to the master that tells it to
-    // update the backlog size. The actual backlog should probably be
-    // the largest requested size by any worker.
-    return 0;
-  }
-
-  function close() {
-    // lib/net.js treats server._handle.close() as effectively synchronous.
-    // That means there is a time window between the call to close() and
-    // the ack by the master process in which we can still receive handles.
-    // onconnection() below handles that by sending those handles back to
-    // the master.
-    if (key === undefined) return;
-    send({ act: 'close', key: key });
-    delete handles[key];
-    delete indexes[indexesKey];
-    key = undefined;
-  }
-
-  function getsockname(out) {
-    if (key) util._extend(out, message.sockname);
-    return 0;
-  }
-
-  // XXX(bnoordhuis) Probably no point in implementing ref() and unref()
-  // because the control channel is going to keep the worker alive anyway.
-  function ref() {
-  }
-
-  function unref() {
-  }
-
-  // Faux handle. Mimics a TCPWrap with just enough fidelity to get away
-  // with it. Fools net.Server into thinking that it's backed by a real
-  // handle.
-  var handle = {
-    close: close,
-    listen: listen,
-    ref: ref,
-    unref: unref,
-  };
-  if (message.sockname) {
-    handle.getsockname = getsockname;  // TCP handles only.
-  }
-  
-  handles[key] = handle;
-  cb(0, handle); // 终于调用 cb 了。。。
-}
-```
-
-然后，下面的回调函数被调用：
-
-```javascript
-// worker进程
-function cb(err, handle) {
-  // err：0
-  // handle: {close: fn, listen: fn, getsockname: fn, ref: fn, unref: fn}
-  if (err === 0 && port > 0 && handle.getsockname) {
-    var out = {};
-    err = handle.getsockname(out);
-    if (err === 0 && port !== out.port)
-      err = uv.UV_EADDRINUSE;
-  }
-
-  self._handle = handle; // 将 handle 赋给 net.Server 实例
-  self._listen2(address, port, addressType, backlog, fd); // 调用 _listen2 方法
-}
-```
-
-看下此时 _listen2 做了什么。主要是抛出 listening 事件，以及 添加 onconnection 监听。
-
-```javascript
-// worker进程
-Server.prototype._listen2 = function(address, port, addressType, backlog, fd) {
-
-  // If there is not yet a handle, we need to create one and bind.
-  // In the case of a server sent via IPC, we don't need to do this.
-  if (this._handle) {
-    debug('_listen2: have a handle already');
-  } 
-
-  this._handle.onconnection = onconnection; // onconnect 回调
-  this._handle.owner = this;
-
-  var err = _listen(this._handle, backlog);
-
-  // generate connection key, this should be unique to the connection
-  this._connectionKey = addressType + ':' + address + ':' + port;
-
-  process.nextTick(emitListeningNT, this);
-};
-```
-
-前面说过，在主进程里，创建了 net.Server 实例，并对端口进行实际的监听。再来回顾这段代码
-
-```javascript
-// master进程
-// Start a round-robin server. Master accepts connections and distributes
-// them over the workers.
-function RoundRobinHandle(key, address, port, addressType, fd) {
-  // 忽略非重点代码
-  this.server = net.createServer(assert.fail);
-  this.server.listen(port, address); // 注意这里的监听
-
-  this.server.once('listening', () => {
-    this.handle = this.server._handle;
-    this.handle.onconnection = (err, handle) => this.distribute(err, handle);
-    this.server._handle = null;
-    this.server = null;
-  });
-}
-```
-
-监听调用的是 net 模块中如下函数：
-
-```javascript
-// master进程
-self._listen2(address, port, addressType, backlog, fd);
-```
-
-```javascript
-// master进程
-Server.prototype._listen2 = function(address, port, addressType, backlog, fd) {
-
-  // If there is not yet a handle, we need to create one and bind.
-  // In the case of a server sent via IPC, we don't need to do this.
-  // 此时，this._handle 是 null（初始化状态），于是走第二个分支
-  if (this._handle) {
-    debug('_listen2: have a handle already');
-  } else {
-    debug('_listen2: create a handle');
-
-    var rval = null;
-
-    if (!address && typeof fd !== 'number') {
-      rval = createServerHandle('::', port, 6, fd);
-
-      if (typeof rval === 'number') {
-        rval = null;
-        address = '0.0.0.0';
-        addressType = 4;
-      } else {
-        address = '::';
-        addressType = 6;
-      }
-    }
-
-    // rval: {"reading":false,"owner":null,"onread":null,"onconnection":null,"writeQueueSize":0}
-    if (rval === null)
-      // 重点是这行代码，在这里面创建 TCP 实例，并进行监听
-      // fd: undefined
-      // address: ::''
-      rval = createServerHandle(address, port, addressType, fd);
-
-    if (typeof rval === 'number') {
-      var error = exceptionWithHostPort(rval, 'listen', address, port);
-      process.nextTick(emitErrorNT, this, error);
-      return;
-    }
-    this._handle = rval;
-  }
-
-  this._handle.onconnection = onconnection;
-  this._handle.owner = this;
-
-  var err = _listen(this._handle, backlog);
-
-  if (err) {
-    var ex = exceptionWithHostPort(err, 'listen', address, port);
-    this._handle.close();
-    this._handle = null;
-    process.nextTick(emitErrorNT, this, ex);
-    return;
-  }
-
-  // generate connection key, this should be unique to the connection
-  this._connectionKey = addressType + ':' + address + ':' + port;
-
-  // unref the handle if the server was unref'ed prior to listening
-  if (this._unref)
-    this.unref();
-
-  process.nextTick(emitListeningNT, this);
-};
-```
-
-主要逻辑：创建 TCP 实例，绑定端口、IP，并返回 handle。
-
-```javascript
-//master进程
-function createServerHandle(address, port, addressType, fd) {
-  var err = 0;
-  // assign handle in listen, and clean up if bind or listen fails
-  var handle;
-
-  var isTCP = false;
-  
-  handle = new TCP();
-  isTCP = true;
-
-  if (address || port || isTCP) {
-    debug('bind to ' + (address || 'anycast'));
-    if (!address) {
-      // Try binding to ipv6 first
-      err = handle.bind6('::', port);
-      if (err) {
-        handle.close();
-        // Fallback to ipv4
-        return createServerHandle('0.0.0.0', port);
-      }
-    } else if (addressType === 6) {
-      err = handle.bind6(address, port);
-    } else {
-      err = handle.bind(address, port);
-    }
-  }
-
-  if (err) {
-    handle.close();
-    return err;
-  }
-
-  return handle;
-}
-```
-
-server._handle 初始化完成，开始监听后，触发 listening 事件。此时，RoundRobinHandle 中的回调函数被调用。
-
-```javascript
-// master进程
-this.server.once('listening', () => {
-  // 将 this.server._handle 赋值给 this.handle
-  this.handle = this.server._handle;
-  // 覆盖 this.handle.onconnection，以达到请求分发的目的
-  this.handle.onconnection = (err, handle) => this.distribute(err, handle);
-  // 将server._handle 设置为null
-  this.server._handle = null;
-  // 将this.server 设置为null（这里只需要 handle 就够了）
-  this.server = null;
-});
-```
-
-经过上面的复杂流程，最终的结果是：
-
-1. master 进程中创建了 net.Server 实例A，并对来自特定端口的请求进行监听。
-2. worker 进程中创建了 net.Server 实例B。
-3. 当新连接创建时，实例A 将请求分发给实例B。（如果有多个worker进程，master进程会按照特定算法进行分发）
-
-## 请求分发
-
-首先，当连接请求进来时，调用 this.distribute(err, handle);
-
-```javascript
-// master进程
-this.handle.onconnection = (err, handle) => this.distribute(err, handle);
-```
-
-看下distribute的实现。主要做了两件事情：
-
-1. 将 handle 加入待处理队列。
-2. 取得第一个空闲的worker，如果存在，就调用 this.handoff(worker); 处理请求。
-
-```javascript
-// master进程
-RoundRobinHandle.prototype.distribute = function(err, handle) {
-  // 将 handle 加入 handles 队列，该队列里是待处理的请求对应的handle。
-  this.handles.push(handle);
-  // 取第一个空闲的worker
-  var worker = this.free.shift();
-  // 如果有空闲的worker
-  if (worker) this.handoff(worker);
-};
-```
-
-看下 handoff(worker) 的实现。
-
-```javascript
-// master进程
-RoundRobinHandle.prototype.handoff = function(worker) {
-  if (worker.id in this.all === false) {
-    return;  // Worker is closing (or has closed) the server.
-  }
-  // 获取第一个待处理的请求
-  var handle = this.handles.shift();
-  if (handle === undefined) {
-    this.free.push(worker);  // Add to ready queue again.
-    return;
-  }
-  var message = { act: 'newconn', key: this.key };
-
-  // 向worker进程发送消息
-  // message：{ act: 'newconn', key: this.key }
-  sendHelper(worker.process, message, handle, (reply) => {
-    // 当 worker进程 收到消息后，ack回应，调用 handle.close() 
-    if (reply.accepted)
-      handle.close();
-    else
-      this.distribute(0, handle);  // Worker is shutting down. Send to another.
-    // 再次调用 handoff(worker)。有可能前面已经有一堆的待处理请求，因此检查下还有没有请求需要处理
-    // 如有，已经空闲出来的worker可以接着处理请求
-    this.handoff(worker);
-  });
-};
-```
-
 
 ## 相关链接
 
-官方文档：https://nodejs.org/api/cluster.html
+官方文档：[https://nodejs.org/api/cluster.html](https://nodejs.org/api/cluster.html)
 
-[How Node.js Multiprocess Load Balancing Works](http://onlinevillage.blogspot.com/2011/11/how-nodejs-multiprocess-load-balancing.html)
+Node学习笔记：[https://github.com/chyingp/nodejs-learning-guide](https://github.com/chyingp/nodejs-learning-guide)

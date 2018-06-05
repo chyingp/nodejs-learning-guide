@@ -65,7 +65,7 @@ readStream.on('end', function(chunk){
 
 例子三：
 
-这里使用了`.pipe(dest)`，好处在于，如果文件
+这里使用了`.pipe(dest)`，好处在于，如果源文件较大，对于降低内存占用有好处。
 
 ```js
 var fs = require('fs');

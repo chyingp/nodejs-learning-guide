@@ -271,6 +271,21 @@ tr.end();
 // ondata: !
 ```
 
+
+## 各种模式
+
+combine stream：
+https://www.npmjs.org/package/multipipe
+https://www.npmjs.com/package/combine-stream
+
+fork stream：
+
+merge stream
+https://www.npmjs.com/package/multistream
+https://npmjs.org/package/merge-stream
+https://npmjs.org/package/multistream-merge
+
+
 ## TODO
 
 ### readSteram

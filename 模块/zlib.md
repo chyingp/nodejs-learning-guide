@@ -81,7 +81,7 @@ server.listen('3000');
 
 ## 服务端字符串gzip压缩
 
-代码跟前面例子大同小异。这里采用了**slib.gzipSync(str)**对字符串进行gzip压缩。
+代码跟前面例子大同小异。这里采用了 **zlib.gzipSync(str)** 对字符串进行gzip压缩。
 
 ```javascript
 var http = require('http');

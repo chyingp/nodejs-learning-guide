@@ -126,7 +126,9 @@ console.log( buf3.equals(buf4) );  // false
 var buf5 = Buffer.from('ABC');  // <Buffer 41 42 43>
 var buf6 = Buffer.from('414243', 'hex');
 
-console.log(buf5.equals(buf6));
+console.log(buf5.equals(buf6));    //true
+
+//只要比较的两者内容相同,`buf.equals(otherBuffer)` 就返回true
 ```
 
 ### buf.compare(target[, targetStart[, targetEnd[, sourceStart[, sourceEnd]]]])

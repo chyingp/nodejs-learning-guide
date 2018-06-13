@@ -7,7 +7,7 @@ http模块四剑客之一的`res`，应该都不陌生了。一个web服务程�
 ```js
 var http = require('http');
 var server = http.createServer(function(req, res){
-    res.send('ok');
+    res.end('ok');
 });
 server.listen(3000);
 ```

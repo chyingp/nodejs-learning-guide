@@ -607,7 +607,7 @@ try{
 ```javascript
 var fs = require('fs');
 
-fs.appendFile('./extra/fileForAppend.txt', 'helo', 'utf8', function(err){
+fs.appendFile('./extra/fileForAppend.txt', 'hello', 'utf8', function(err){
     if(err) throw err;
     console.log('append成功');
 });

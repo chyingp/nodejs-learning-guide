@@ -174,7 +174,6 @@ path.parse(path)
 
 ```javascript
 var path = require('path');
-var filepath = '/tmp/demo/js/test.js';
 
 var index = 0;
 

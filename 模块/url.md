@@ -182,7 +182,7 @@ url.resolve('http://example.com/one', '/two') // 'http://example.com/two'
 
 ## 非法字符转义
 
-url字符是有个下面的字符会被转义（非法字符）
+url字符如果有下面的字符会被转义（非法字符）
 
 > &lt; &gt; " \` \r \n \t { } \| \ ^ '
 

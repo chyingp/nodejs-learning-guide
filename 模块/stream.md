@@ -131,15 +131,14 @@ var opt = {
 	port: '3000'
 };
 
-var client = net.connect(opt, function(){
-	client.write('msg from client');  // 可写
+var server = net.createServer((socket) => {
+    socket.on('data', (data) => {
+        console.log('client send message: ', data.toString());
+    });
+    socket.write('hello client');
 });
-
-// 可读
-client.on('data', function(data){
-    // server: msg from client [msg from client]
-	console.log('client: got reply from server [%s]', data);
-	client.end();
+server.listen(opt.port, opt.host, ()=>{
+    console.log(server.address());
 });
 ```
 

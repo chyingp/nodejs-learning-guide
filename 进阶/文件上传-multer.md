@@ -67,7 +67,7 @@ app.listen(3000);
 [form.html](../examples/2016.11.07-advanced-express-multer/upload-single/form.html)。
 
 ```html
-<form action="/upload-single" method="post" enctype="multipart/form-data">
+<form action="/upload" method="post" enctype="multipart/form-data">
     <h2>单图上传</h2>
     <input type="file" name="logo">
     <input type="submit" value="提交">
@@ -119,7 +119,7 @@ app.listen(3000);
 
 
 ```html
-<form action="/upload-multi" method="post" enctype="multipart/form-data">
+<form action="/upload" method="post" enctype="multipart/form-data">
     <h2>多图上传</h2>
     <input type="file" name="logos">
     <input type="file" name="logos">
@@ -199,7 +199,7 @@ app.listen(3000);
 
 非常简单，比如我们想将文件上传到 my-upload 目录下，修改下 dest 配置项就行。
 
-```
+```javascript
 var upload = multer({ dest: 'upload/' });
 ```
 
@@ -218,7 +218,7 @@ var upload = multer({ dest: 'upload/' });
 
 [app.js](../examples/2016.11.07-advanced-express-multer/upload-custom-filename/app.js)。
 
-```
+```javascript
 var fs = require('fs');
 var express = require('express');
 var multer  = require('multer')

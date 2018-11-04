@@ -20,7 +20,7 @@ var https = require('https');
 
 https.get('https://www.baidu.com', function(res){
     console.log('status code: ' + res.statusCode);
-    console.log('headers: ' + res.headers);
+    console.log('headers: ' + JSON.stringify(res.headers));
 
     res.on('data', function(data){
         process.stdout.write(data);
@@ -148,7 +148,6 @@ ps：个人认为这里的错误提示有点误导人，12306网站的证书并�
 ```js
 // 例子：忽略安全警告
 var https = require('https');
-var fs = require('fs');
 
 var options = { 
     hostname: 'kyfw.12306.cn',

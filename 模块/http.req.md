@@ -43,7 +43,6 @@ http.IncomingMessage的属性/方法/事件 不是特别多，按照是否客户
 | 属性    |   statusCode |  ✕  |   ✓   |
 | 属性    |   statusMessage |  ✕  |   ✓   |
 | 属性    |   httpVersion |  ✓  |   ✓   |
-| 属性    |   httpVersion |  ✓  |   ✓   |
 | 属性    |   url |  ✓  |   ✕   |
 | 属性    |   socket |  ✓  |   ✓   |
 | 方法    |   .destroy() |  ✓  |   ✓   |
@@ -180,7 +179,7 @@ nick=casper&hello=world
 ```js
 var http = require('http');
 var server = http.createServer(function(req, res){
-    res.writeHead(200, {'content-type': 'text/plain',});
+    res.writeHead(200, {'content-type': 'text/plain'});
     res.end('from server');
 });
 server.listen(3000);

@@ -2,7 +2,7 @@
 
 dgram模块是对UDP socket的一层封装，相对net模块简单很多，下面看例子。
 
-## UPD客户端 vs UDP服务端
+## UDP客户端 vs UDP服务端
 
 首先，启动UDP server，监听来自端口33333的请求。
 

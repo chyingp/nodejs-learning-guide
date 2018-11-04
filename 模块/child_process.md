@@ -240,7 +240,7 @@ child.on('message', function(m){
 
 child.send({from: 'parent'});
 ```
-
+child.js
 ```javascript
 process.on('message', function(m){
     console.log('message from parent: ' + JSON.stringify(m));

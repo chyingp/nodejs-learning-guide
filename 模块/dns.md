@@ -92,7 +92,7 @@ dns.resolve4('www.qq.com', function(err, address, family){
 ```bash
 ➜  2016.11.03-node-dns git:(master) ✗ node lookup-vs-resolve4.js 
 配置host后，dns.resolve4 =>182.254.34.74
-配置host后，dns.lokup =>127.0.0.1
+配置host后，dns.lookup =>127.0.0.1
 ```
 
 ## 其他接口

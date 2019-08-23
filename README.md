@@ -1,7 +1,5 @@
 ## Nodejs学习笔记
 
->腾讯IVWEB前端团队招前端工程师，2年以上工作经验，本科以上学历，有意者可私信、留言，或者邮箱联系 2377488447@qq.com，招聘要求可参考 [这里](https://careers.tencent.com/jobdesc.html?postId=1123178027954475008)
-
 Nodejs学习过程中的一些总结，可[点击这里](https://github.com/chyingp/nodejs-learning-guide)查看完整版。欢迎关注公众号 [程序猿小卡](https://www.chyingp.com/wp-content/uploads/2018/02/qrcode_for_gh_7ba65667d1aa_344.jpg)。
 
 * 基础：核心模块常用API 的使用、注意事项。（含可执行的demo）

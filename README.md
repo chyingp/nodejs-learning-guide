@@ -2,6 +2,10 @@
 
 Nodejs学习过程中的一些总结，可[点击这里](https://github.com/chyingp/nodejs-learning-guide)查看完整版。欢迎关注公众号 [程序猿小卡](https://www.chyingp.com/wp-content/uploads/2018/02/qrcode_for_gh_7ba65667d1aa_344.jpg)。
 
+>阿里CBU前端团队招人，感兴趣的小伙伴加我微信casperchen，加之前附录自己的博客或者github地址，简历可直接发 416394284@qq.com 👈
+>
+>不管是serverless、跨端、WEB IDE、工程化、智能化、搭建 还是 直播，在CBU 前端团队 都能够找到适合你的技术方向。
+
 * 基础：核心模块常用API 的使用、注意事项。（含可执行的demo）
 * 进阶：项目实战经验总结，含常用框架、库介绍，从编码到服务端部署运维。
 

@@ -1,9 +1,7 @@
 ## Nodejs学习笔记
 
 >阿里CBU前端团队招人，不管是serverless、跨端、WEB IDE、工程化、智能化、搭建 还是 直播，在CBU 前端团队 都能够找到适合你的技术方向。
->感兴趣的小伙伴可以加群沟通，![image](https://user-images.githubusercontent.com/2383346/85119262-1060d580-b254-11ea-8287-a99b54307ec7.png)
-
-
+>感兴趣的小伙伴可以加QQ群沟通（1126560208）
 
 Nodejs学习过程中的一些总结，可[点击这里](https://github.com/chyingp/nodejs-learning-guide)查看完整版。欢迎关注公众号 [程序猿小卡](https://www.chyingp.com/wp-content/uploads/2018/02/qrcode_for_gh_7ba65667d1aa_344.jpg)。
 

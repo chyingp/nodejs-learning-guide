@@ -1,5 +1,8 @@
 var http = require('http');
 
+// 服务端表现
+// abort请求时，服务端req的aborted、close事件都会触发；（诡异）
+// 请求正常完成时，服务端req的close事件不会触发；（也很诡异）
 var server = http.createServer(function(req, res){
 	
 	console.log('1、收到客户端请求: ' + req.url);

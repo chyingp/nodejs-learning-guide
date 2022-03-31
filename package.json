@@ -22,6 +22,7 @@
     "concat-stream": "^1.6.0",
     "content-type": "^1.0.2",
     "express": "^4.15.3",
+    "fs-extra": "^5.0.0",
     "iconv-lite": "^0.4.17",
     "through": "^2.3.8"
   }
